@@ -525,14 +525,63 @@
             const M = T / 3;
             const limit = W + (M / 4);
 
+            // ================= 优化：未来排期推演引擎 =================
             if (R > limit) {
-                panel.className = 'alert-danger';
-                panel.innerHTML = `
-                <strong>⏳ 未进入收割线</strong><br>
-                剩余时间太长，水缸扣满也无法一次带走。<br>
-                当前水缸上限为 ${formatDuration(M)}。<br>
-                👉 <strong>建议：</strong>请等待水缸流干，补满水后再重新计算。
-            `;
+                let currR = R;
+                let currW = W;
+                let passed = 0;
+                let actions = [];
+
+                // 1. 推算当前这缸水什么时候烧干
+                if (currW > 0) {
+                    passed += currW;
+                    currR -= currW;
+                    actions.push({ type: 'water', offset: passed, title: '水缸干涸，需补满水缸 💧' });
+                } else {
+                    // 如果当前水就是 0，立刻要求补水
+                    actions.push({ type: 'water', offset: 0, title: '水缸已空，请立刻补水！ 💧' });
+                }
+                
+                currW = M; // 模拟补满水
+
+                // 2. 如果补满水后，剩下的时间依旧太长，说明中间还要经历完整的烧水周期
+                while (currR - currW > M / 4) {
+                    passed += M;
+                    currR -= M;
+                    actions.push({ type: 'water', offset: passed, title: '水缸干涸，需补满水缸 💧' });
+                }
+
+                // 3. 终于跨入终极斩杀周期！计算最后的那段等待时间
+                let finalWait = Math.max(0, (4 * currR - M + currW) / 5);
+                passed += finalWait;
+                actions.push({ type: 'kill', offset: passed, title: '🔥 终极秒熟！马上淋水收割！' });
+
+                // 4. 渲染预测排期 UI
+                const now = new Date();
+                let html = `<strong style="font-size: 16px;">⏳ 尚未进入斩杀线，后续排期如下：</strong><br>`;
+                html += `<ul style="margin: 10px 0; padding-left: 20px; font-size: 14px; color: var(--text-main);">`;
+                
+                actions.forEach(act => {
+                    const actTime = new Date(now.getTime() + act.offset * 60000);
+                    const dayPrefix = actTime.getDate() !== now.getDate() ? "明天 " : "今天 ";
+                    const timeStr = `${dayPrefix}${formatClockTime(actTime)}`;
+                    const durationStr = act.offset === 0 ? "现在" : formatDuration(act.offset) + "后";
+                    
+                    if (act.type === 'water') {
+                        html += `<li style="margin-bottom: 6px;">${durationStr} <strong>(${timeStr})</strong><br><span style="color: var(--secondary); font-weight: bold;">${act.title}</span></li>`;
+                    } else {
+                        html += `<li style="margin-bottom: 6px;">${durationStr} <strong>(${timeStr})</strong><br><span style="color: var(--danger); font-weight: bold;">${act.title}</span></li>`;
+                    }
+                });
+                html += `</ul>`;
+
+                // 提取下一个最近的动作，生成一键闹钟
+                const nextAct = actions[0];
+                const nextTime = now.getTime() + nextAct.offset * 60000;
+                html += `<button class="alarm-btn" style="margin-top: 5px;" onclick="createAlarm('农场补水', ${nextTime})">⏰ 为下一次操作设日历</button>`;
+
+                panel.className = 'alert-warning';
+                panel.innerHTML = html;
                 return;
             }
 
