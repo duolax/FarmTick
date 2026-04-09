@@ -544,7 +544,7 @@
                 return;
             }
 
-            // ================= 真理推演引擎：1倍自然流速 + 瞬间浇水奖励 =================
+            // ================= 真理推演引擎 =================
             const limit = W + (M / 4);
 
             if (R > limit) {
@@ -553,31 +553,37 @@
                 let passed = 0;
                 let actions = [];
 
-                // 只要还达不到一波流的条件，就老老实实熬干水缸再浇水
                 while (currR > currW + (M / 4)) {
                     if (currW > 0) {
                         passed += currW;
-                        currR -= currW; // 核心修正：自然时间就是 1 倍速流逝！
+                        currR -= currW; 
                         actions.push({ type: 'water', offset: Math.round(passed), title: '💧 储水干涸，需补满水' });
-                        
-                        // 模拟玩家点下浇水键：水加满，并瞬间扣除 M/4 的进度！
                         currW = M;
                         currR -= (M / 4); 
                     } else {
                         actions.push({ type: 'water', offset: Math.round(passed), title: '💧 尚未浇水，请立刻补水！' });
-                        // 模拟玩家点下浇水键：水加满，并瞬间扣除 M/4 的进度！
                         currW = M;
                         currR -= (M / 4);
                     }
                 }
 
-                // 终于熬进了斩杀线，祭出你那无敌的完美公式！
-                let finalWait = (4 * currR - M + currW) / 5;
-                finalWait = Math.max(0, Math.round(finalWait));
-                passed += finalWait;
-                actions.push({ type: 'kill', offset: Math.round(passed), title: '🔥 终极秒熟！马上浇水收割！' });
+                // 核心修复：推演结束后的最后一击，加入门槛判定
+                let mathWait = (4 * currR - M + currW) / 5;
+                let unlockWait = (M * 0.1) - (M - currW); // 按键解锁需要的时间
+                
+                // 真实等待时间 = 理论值与解锁值取最大，并向上取整确保绝对跨过门槛
+                let finalWait = Math.max(mathWait, unlockWait);
+                finalWait = Math.max(0, Math.ceil(finalWait));
 
-                // 渲染排期表
+                // 终极判定：如果强行等按键亮起，植物早就熟了，那就标记为自然成熟
+                if (finalWait >= currR) {
+                    passed += currR;
+                    actions.push({ type: 'kill', offset: Math.round(passed), title: '🌾 完美收官！自然成熟！' });
+                } else {
+                    passed += finalWait;
+                    actions.push({ type: 'kill', offset: Math.round(passed), title: '🔥 终极秒熟！马上浇水收割！' });
+                }
+
                 const now = new Date();
                 let html = `<strong style="font-size: 16px;">⏳ 尚未进入斩杀线，后续排期如下：</strong><br>`;
                 html += `<ul style="margin: 10px 0; padding-left: 20px; font-size: 14px; color: var(--text-main);">`;
@@ -606,19 +612,21 @@
                 return;
             }
 
-            // ================= 原汁原味的终极斩杀计算 =================
-            let waitMins = (4 * R - M + W) / 5;
-            waitMins = Math.max(0, Math.round(waitMins));
+            // ================= 斩杀线内的门槛完美兼容 =================
+            let mathWait = (4 * R - M + W) / 5;
+            let unlockWait = (M * 0.1) - (M - W);
+            
+            // 核心修复：真实等待时间，取两者的最大值，向上取整
+            let waitMins = Math.max(mathWait, unlockWait);
+            waitMins = Math.max(0, Math.ceil(waitMins));
 
-            const missingWaterAfterWait = (M - W) + waitMins;
-            const threshold10 = M * 0.1;
-
-            if (missingWaterAfterWait < threshold10 && waitMins > 0) {
+            // 如果为了等按键亮起花的时间，比植物自然成熟还慢，那才是真正的“卡门槛”
+            if (waitMins >= R) {
                 panel.className = 'alert-warning';
                 panel.innerHTML = `
                 <strong>⚠️ 卡 10% 补水门槛</strong><br>
-                完美收割时间不足以触发游戏的 10% 补水门槛限制。<br>
-                👉 <strong>建议：</strong>无须理会，让植物自然成熟即可。
+                等待浇水按键亮起的时间（${formatDuration(waitMins)}）已经大于等于自然成熟的时间（${formatDuration(R)}）。<br>
+                👉 <strong>建议：</strong>无须操作，让植物自然成熟即可。
                 `;
                 return;
             }
@@ -640,12 +648,14 @@
                 <strong>✅ 完美收割时机</strong><br>
                 你需要精确等待：<strong>${formatDuration(waitMins)}</strong><br>
                 <span class="alarm-time">⏰ 闹钟设定为：${dayPrefix}${formatClockTime(alarmTime)}</span>
-                在此时间点准时按下浇水键，植物将瞬间成熟！
+                在此时间点，浇水按键将刚好亮起，按下瞬间成熟！
                 `;
                 panel.innerHTML += `<button class="alarm-btn" style="margin-top: 10px;" onclick="createAlarm('农场秒熟收割', ${alarmTime.getTime()})">⏰ 为本次操作设日历</button>`;
             }
         }
-        
+
+
+
 
         // 初始化当前时间
         window.addEventListener('DOMContentLoaded', (event) => {
