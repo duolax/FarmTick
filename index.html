@@ -1,872 +1,1345 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-
-<head>
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="referrer" content="no-referrer-when-downgrade">
+  <head>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="no-referrer-when-downgrade" />
     <title>王者农场专业务农 | 极限收割计划</title>
     <style>
-        :root {
-            --primary: #2e7d32;
-            --primary-light: #e8f5e9;
-            --secondary: #1976d2;
-            --bg: #f4f7f6;
-            --card-bg: #ffffff;
-            --text-main: #333333;
-            --text-muted: #666666;
-            --border: #e0e0e0;
-            --danger: #d32f2f;
-            --warning: #ed6c02;
-        }
+      :root {
+        --primary: #2e7d32;
+        --primary-light: #e8f5e9;
+        --secondary: #1976d2;
+        --bg: #f4f7f6;
+        --card-bg: #ffffff;
+        --text-main: #333333;
+        --text-muted: #666666;
+        --border: #e0e0e0;
+        --danger: #d32f2f;
+        --warning: #ed6c02;
+      }
 
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background-color: var(--bg);
+        color: var(--text-main);
+        margin: 0;
+        padding: 20px;
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 950px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        text-align: center;
+        color: var(--primary);
+        margin-bottom: 30px;
+        font-size: 28px;
+      }
+
+      .card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        padding: 24px;
+        margin-bottom: 24px;
+      }
+
+      .card-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-top: 0;
+        margin-bottom: 16px;
+        color: var(--secondary);
+        border-bottom: 2px solid var(--border);
+        padding-bottom: 8px;
+      }
+
+      /* 表单样式 */
+      .form-group {
+        margin-bottom: 16px;
+      }
+
+      .form-group label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 8px;
+        color: var(--text-main);
+      }
+
+      .input-row {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+
+      select,
+      input[type="number"] {
+        padding: 10px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        font-size: 16px;
+        width: 100%;
+      }
+
+      .input-row input {
+        flex: 1;
+      }
+
+      .input-addon {
+        color: var(--text-muted);
+        font-weight: bold;
+      }
+
+      /* 快速选择按钮样式 */
+      .btn-group {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .time-btn {
+        flex: 1;
+        min-width: 60px;
+        padding: 10px 0;
+        border: 1px solid var(--primary);
+        background: transparent;
+        color: var(--primary);
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+        transition: all 0.2s;
+      }
+
+      .time-btn.active {
+        background: var(--primary);
+        color: white;
+      }
+
+      /* 结果面板 */
+      #resultPanel {
+        display: none;
+        padding: 20px;
+        border-radius: 8px;
+        margin-top: 20px;
+        font-size: 16px;
+      }
+
+      .alert-danger {
+        background-color: #ffebee;
+        color: var(--danger);
+        border: 1px solid #ffcdd2;
+      }
+
+      .alert-warning {
+        background-color: #fff3e0;
+        color: var(--warning);
+        border: 1px solid #ffe0b2;
+      }
+
+      .alert-success {
+        background-color: var(--primary-light);
+        color: var(--primary);
+        border: 1px solid #c8e6c9;
+      }
+
+      .alarm-time {
+        font-size: 28px;
+        font-weight: bold;
+        display: block;
+        margin: 12px 0;
+      }
+
+      /* 优化版：迷你横向卡片样式 (无需滑动) */
+      .timeline-container {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        padding-bottom: 5px;
+        scrollbar-width: none;
+        /* 隐藏滚动条 */
+      }
+
+      .timeline-container::-webkit-scrollbar {
+        display: none;
+      }
+
+      .timeline-card {
+        flex: 1;
+        min-width: 0;
+        background: #fafafa;
+        border-radius: 8px;
+        padding: 10px 4px;
+        text-align: center;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      }
+
+      /* 手机端日历闹钟按钮 */
+      .alarm-btn {
+        margin-top: 8px;
+        padding: 6px 0;
+        font-size: 11px;
+        font-weight: bold;
+        color: var(--primary);
+        background: var(--primary-light);
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: 0.2s;
+        width: 100%;
+        letter-spacing: -0.5px;
+      }
+
+      .alarm-btn:hover {
+        background: #c8e6c9;
+      }
+
+      .alarm-btn-danger {
+        color: var(--danger);
+        background: #ffebee;
+      }
+
+      .alarm-btn-danger:hover {
+        background: #ffcdd2;
+      }
+
+      /* 数据表样式 */
+      .table-wrapper {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        min-width: 600px;
+      }
+
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+      }
+
+      th {
+        background-color: var(--primary-light);
+        color: var(--primary);
+        font-weight: bold;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      th:hover {
+        background-color: #c8e6c9;
+      }
+
+      .row-hover:hover {
+        background-color: #f9f9f9;
+      }
+
+      .highlight-data {
+        font-weight: bold;
+        color: var(--danger);
+      }
+
+      .pmo-warning {
+        color: #999;
+      }
+
+      .pmo-star {
+        font-weight: bold;
+        color: var(--primary);
+        background-color: #fff8e1;
+      }
+
+      .pmo-crown {
+        font-weight: bold;
+        color: #d84315;
+        background-color: #ffcc80;
+      }
+
+      /* 为顶级版本答案增加的特殊高亮 */
+
+      /* ================= 手机端精准缩放适配 (兼容所有浏览器) ================= */
+      @media screen and (max-width: 768px) {
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: var(--bg);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 950px;
-            margin: 0 auto;
-        }
-
-        h1 {
-            text-align: center;
-            color: var(--primary);
-            margin-bottom: 30px;
-            font-size: 28px;
-        }
-
+          padding: 8px;
+        } /* 缩小页面边缘留白 */
         .card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            padding: 24px;
-            margin-bottom: 24px;
-        }
-
+          padding: 16px;
+          margin-bottom: 16px;
+        } /* 缩小卡片内边距 */
+        h1 {
+          font-size: 22px;
+          margin-bottom: 20px;
+        } /* 缩小主标题 */
         .card-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-top: 0;
-            margin-bottom: 16px;
-            color: var(--secondary);
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 8px;
-        }
+          font-size: 16px;
+          margin-bottom: 12px;
+        } /* 缩小副标题 */
 
-        /* 表单样式 */
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        .form-group label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 8px;
-            color: var(--text-main);
-        }
-
-        .input-row {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
+        /* 缩小输入框和下拉菜单 */
         select,
-        input[type="number"] {
-            padding: 10px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 16px;
-            width: 100%;
+        input[type="number"],
+        input[type="datetime-local"] {
+          font-size: 14px;
+          padding: 8px;
         }
-
-        .input-row input {
-            flex: 1;
-        }
-
-        .input-addon {
-            color: var(--text-muted);
-            font-weight: bold;
-        }
-
-
-        /* 快速选择按钮样式 */
-        .btn-group {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
+        /* 缩小排期器的 4 个按钮 */
         .time-btn {
-            flex: 1;
-            min-width: 60px;
-            padding: 10px 0;
-            border: 1px solid var(--primary);
-            background: transparent;
-            color: var(--primary);
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            transition: all 0.2s;
+          font-size: 13px;
+          padding: 8px 0;
         }
 
-        .time-btn.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        /* 结果面板 */
-        #resultPanel {
-            display: none;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-            font-size: 16px;
-        }
-
-        .alert-danger {
-            background-color: #ffebee;
-            color: var(--danger);
-            border: 1px solid #ffcdd2;
-        }
-
-        .alert-warning {
-            background-color: #fff3e0;
-            color: var(--warning);
-            border: 1px solid #ffe0b2;
-        }
-
-        .alert-success {
-            background-color: var(--primary-light);
-            color: var(--primary);
-            border: 1px solid #c8e6c9;
-        }
-
-        .alarm-time {
-            font-size: 28px;
-            font-weight: bold;
-            display: block;
-            margin: 12px 0;
-        }
-
-
-        /* 优化版：迷你横向卡片样式 (无需滑动) */
-        .timeline-container {
-            display: flex;
-            gap: 6px;
-            overflow-x: auto;
-            padding-bottom: 5px;
-            scrollbar-width: none;
-            /* 隐藏滚动条 */
-        }
-
-        .timeline-container::-webkit-scrollbar {
-            display: none;
-        }
-
-        .timeline-card {
-            flex: 1;
-            min-width: 0;
-            background: #fafafa;
-            border-radius: 8px;
-            padding: 10px 4px;
-            text-align: center;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-        }
-
-        /* 手机端日历闹钟按钮 */
-        .alarm-btn {
-            margin-top: 8px;
-            padding: 6px 0;
-            font-size: 11px;
-            font-weight: bold;
-            color: var(--primary);
-            background: var(--primary-light);
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: 0.2s;
-            width: 100%;
-            letter-spacing: -0.5px;
-        }
-
-        .alarm-btn:hover {
-            background: #c8e6c9;
-        }
-
-        .alarm-btn-danger {
-            color: var(--danger);
-            background: #ffebee;
-        }
-
-        .alarm-btn-danger:hover {
-            background: #ffcdd2;
-        }
-
-        /* 数据表样式 */
-        .table-wrapper {
-            overflow-x: auto;
-        }
-
+        /* 缩小数据表格 */
         table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-            min-width: 600px;
+          font-size: 12px;
         }
-
         th,
         td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
+          padding: 8px 6px;
         }
 
-        th {
-            background-color: var(--primary-light);
-            color: var(--primary);
-            font-weight: bold;
-            cursor: pointer;
-            user-select: none;
+        /* 缩小顶部的个人名片 */
+        .card > div[style*="font-size: 48px"] {
+          font-size: 36px !important;
+          padding: 8px !important;
         }
-
-        th:hover {
-            background-color: #c8e6c9;
+        .card > div > h3 {
+          font-size: 18px !important;
         }
-
-        .row-hover:hover {
-            background-color: #f9f9f9;
-        }
-
-        .highlight-data {
-            font-weight: bold;
-            color: var(--danger);
-        }
-
-        .pmo-warning {
-            color: #999;
-        }
-
-        .pmo-star {
-            font-weight: bold;
-            color: var(--primary);
-            background-color: #fff8e1;
-        }
-
-        .pmo-crown {
-            font-weight: bold;
-            color: #d84315;
-            background-color: #ffcc80;
-        }
-
-        /* 为顶级版本答案增加的特殊高亮 */
-
-
-        /* ================= 手机端精准缩放适配 (兼容所有浏览器) ================= */
-        @media screen and (max-width: 768px) {
-            body { padding: 8px; } /* 缩小页面边缘留白 */
-            .card { padding: 16px; margin-bottom: 16px; } /* 缩小卡片内边距 */
-            h1 { font-size: 22px; margin-bottom: 20px; } /* 缩小主标题 */
-            .card-title { font-size: 16px; margin-bottom: 12px; } /* 缩小副标题 */
-            
-            /* 缩小输入框和下拉菜单 */
-            select, input[type="number"], input[type="datetime-local"] { 
-                font-size: 14px; padding: 8px; 
-            }
-            /* 缩小排期器的 4 个按钮 */
-            .time-btn { font-size: 13px; padding: 8px 0; }
-            
-            /* 缩小数据表格 */
-            table { font-size: 12px; }
-            th, td { padding: 8px 6px; }
-            
-            /* 缩小顶部的个人名片 */
-            .card > div[style*="font-size: 48px"] { font-size: 36px !important; padding: 8px !important; }
-            .card > div > h3 { font-size: 18px !important; }
-        }
+      }
     </style>
-</head>
+  </head>
 
-<body>
-
+  <body>
     <div class="container">
-        <h1>🌾 王者农场专业务农</h1>
+      <h1>🌾 王者农场专业务农</h1>
 
+      <div
+        class="card"
+        style="
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          padding: 16px 24px;
+        "
+      >
+        <div
+          style="
+            font-size: 48px;
+            line-height: 1;
+            background: var(--primary-light);
+            padding: 12px;
+            border-radius: 50%;
+          "
+        >
+          🐢
+        </div>
+        <div>
+          <h3 style="margin: 0; color: var(--primary); font-size: 20px">
+            CJ凑字数
+          </h3>
+          <p style="margin: 6px 0 0; font-size: 14px; color: var(--text-muted)">
+            小红薯🍠 ID:1483848881
+          </p>
+        </div>
+      </div>
 
-        <div class="card" style="display: flex; align-items: center; gap: 20px; padding: 16px 24px;">
-            <div
-                style="font-size: 48px; line-height: 1; background: var(--primary-light); padding: 12px; border-radius: 50%;">
-                🐢
-            </div>
-            <div>
-                <h3 style="margin: 0; color: var(--primary); font-size: 20px;">CJ凑字数</h3>
-                <p style="margin: 6px 0 0; font-size: 14px; color: var(--text-muted);">
-                    小红薯🍠 ID:1483848881
-                </p>
+      <div class="card">
+        <h2 class="card-title">⏱️ 极限收割计算器</h2>
 
-            </div>
+        <div class="form-group">
+          <label>1. 快速选择作物 (自动填充总时间)</label>
+          <select id="cropSelect" onchange="fillTotalTime()">
+            <option value="0,0">-- 手动输入 --</option>
+            <option value="1,0">
+              (1小时) 土豆 / 向日葵 / 黄瓜 / 白萝卜 / 洋葱 / 莴笋 / 四季豆 /
+              甘蔗 / 桑葚 / 树莓 / 咖啡豆
+            </option>
+            <option value="8,0">
+              (8小时) 玉米 / 青椒 / 茄子 / 葡萄 / 花菜 / 红枣 / 冬瓜 / 葫芦 /
+              杏子 / 芒果 / 火龙果
+            </option>
+            <option value="16,0">
+              (16小时) 草莓 / 大蒜 / 香蕉 / 南瓜 / 柚子 / 生菜 / 西瓜 / 花生 /
+              棉花 / 李子 / 桃子 / 哈密瓜 / 山竹 / 石榴 / 香蕉 / 柚子 / 西瓜 /
+              木瓜 / 橘子 / 杨桃 / 柠檬 / 枇杷 / 山楂 / 牛油果
+            </option>
+            <option value="32,0">
+              (32小时) 蓝莓 / 卷心菜 / 辣椒 / 荞麦 / 菠萝 / 梨子 / 樱桃 / 灯笼果
+              / 猕猴桃 / 莲花
+            </option>
+          </select>
         </div>
 
-
-
-        <div class="card">
-            <h2 class="card-title">⏱️ 极限收割计算器</h2>
-
-
-            <div class="form-group">
-                <label>1. 快速选择作物 (自动填充总时间)</label>
-                <select id="cropSelect" onchange="fillTotalTime()">
-                    <option value="0,0">-- 手动输入 --</option>
-                    <option value="1,0"> (1小时) 土豆 / 向日葵 / 黄瓜 / 白萝卜 / 洋葱 / 莴笋 / 四季豆 / 甘蔗 / 桑葚 / 树莓 / 咖啡豆 </option>
-                    <option value="8,0"> (8小时) 玉米 / 青椒 / 茄子 / 葡萄 / 花菜 / 红枣 / 冬瓜 / 葫芦 / 杏子 / 芒果 / 火龙果 </option>
-                    <option value="16,0"> (16小时) 草莓 / 大蒜 / 香蕉 / 南瓜 / 柚子 / 生菜 / 西瓜 / 花生 / 棉花 / 李子 / 桃子 / 哈密瓜 / 山竹 / 石榴 /
-                        香蕉 / 柚子 / 西瓜 / 木瓜 / 橘子 / 杨桃 / 柠檬 / 枇杷 / 山楂 / 牛油果 </option>
-                    <option value="32,0"> (32小时) 蓝莓 / 卷心菜 / 辣椒 / 荞麦 / 菠萝 / 梨子 / 樱桃 / 灯笼果 / 猕猴桃 / 莲花 </option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>2. 植物总时间</label>
-                <div class="input-row">
-                    <input type="number" id="t_h" placeholder="时" value="0" min="0" oninput="calculate()"> <span
-                        class="input-addon">时</span>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>3. 当前剩余种植时间</label>
-                <div class="input-row">
-                    <input type="number" id="r_h" placeholder="时" value="0" min="0" oninput="calculate()"> <span
-                        class="input-addon">时</span>
-                    <input type="number" id="r_m" placeholder="分" value="0" min="0" max="59" oninput="calculate()">
-                    <span class="input-addon">分</span>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>4. 当前剩余水量</label>
-                <div class="input-row">
-                    <input type="number" id="w_h" placeholder="时" value="0" min="0" oninput="calculate()"> <span
-                        class="input-addon">时</span>
-                    <input type="number" id="w_m" placeholder="分" value="0" min="0" max="59" oninput="calculate()">
-                    <span class="input-addon">分</span>
-                </div>
-            </div>
-
-            <div id="resultPanel"></div>
+        <div class="form-group">
+          <label>2. 植物总时间</label>
+          <div class="input-row">
+            <input
+              type="number"
+              id="t_h"
+              placeholder="时"
+              value="0"
+              min="0"
+              oninput="calculate()"
+            />
+            <span class="input-addon">时</span>
+          </div>
         </div>
 
-
-
-
-
-        <div class="card">
-            <h2 class="card-title">📅 全周期播种排期器</h2>
-            <p style="font-size: 14px; color: var(--text-muted);">种下瞬间一键排期，精准规划各次浇水闹钟。</p>
-
-            <div class="form-group">
-                <label>1. 农作物总时长</label>
-                <div class="btn-group">
-                    <button type="button" class="time-btn" onclick="setDuration(60, this)">1 小时</button>
-                    <button type="button" class="time-btn" onclick="setDuration(480, this)">8 小时</button>
-                    <button type="button" class="time-btn active" onclick="setDuration(960, this)">16 小时</button>
-                    <button type="button" class="time-btn" onclick="setDuration(1920, this)">32 小时</button>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>2. 实际种下时间</label>
-                <input type="datetime-local" id="plantTime" onchange="generateTimeline()">
-            </div>
-
-            <div id="timelinePanel" style="display: none; margin-top: 25px;">
-                <div class="timeline-container">
-                    <div class="timeline-card" style="border-top: 4px solid var(--primary);">
-                        <div style="font-size: 22px; margin-bottom: 4px;">🌱</div>
-                        <div style="font-size: 12px; font-weight: bold; color: var(--text-main); margin-bottom: 4px;">种下
-                        </div>
-                        <div id="time1" style="font-size: 14px; font-weight: bold; color: var(--primary);">--:--</div>
-                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">立刻浇水</div>
-                    </div>
-                    <div class="timeline-card" style="border-top: 4px solid var(--secondary);">
-                        <div style="font-size: 22px; margin-bottom: 4px;">💧</div>
-                        <div style="font-size: 12px; font-weight: bold; color: var(--text-main); margin-bottom: 4px;">
-                            第2次</div>
-                        <div id="time2" style="font-size: 14px; font-weight: bold; color: var(--secondary);">--:--</div>
-                        <div id="offset2" style="font-size: 11px; color: var(--text-muted); margin-top: 2px;"></div>
-                        <div id="alarmBox2"></div>
-                    </div>
-                    <div class="timeline-card" style="border-top: 4px solid var(--secondary);">
-                        <div style="font-size: 22px; margin-bottom: 4px;">💧</div>
-                        <div style="font-size: 12px; font-weight: bold; color: var(--text-main); margin-bottom: 4px;">
-                            第3次</div>
-                        <div id="time3" style="font-size: 14px; font-weight: bold; color: var(--secondary);">--:--</div>
-                        <div id="offset3" style="font-size: 11px; color: var(--text-muted); margin-top: 2px;"></div>
-                        <div id="alarmBox3"></div>
-                    </div>
-                    <div class="timeline-card" style="border-top: 4px solid var(--danger); background-color: #fffaf0;">
-                        <div style="font-size: 22px; margin-bottom: 4px;">🔥</div>
-                        <div style="font-size: 12px; font-weight: bold; color: var(--danger); margin-bottom: 4px;">终极秒熟
-                        </div>
-                        <div id="time4" style="font-size: 14px; font-weight: bold; color: var(--danger);">--:--</div>
-                        <div id="offset4"
-                            style="font-size: 11px; color: var(--danger); margin-top: 2px; opacity: 0.85;"></div>
-                        <div id="alarmBox4"></div>
-                    </div>
-                </div>
-            </div>
+        <div class="form-group">
+          <label>3. 当前剩余种植时间</label>
+          <div class="input-row">
+            <input
+              type="number"
+              id="r_h"
+              placeholder="时"
+              value="0"
+              min="0"
+              oninput="calculate()"
+            />
+            <span class="input-addon">时</span>
+            <input
+              type="number"
+              id="r_m"
+              placeholder="分"
+              value="0"
+              min="0"
+              max="59"
+              oninput="calculate()"
+            />
+            <span class="input-addon">分</span>
+          </div>
         </div>
 
+        <div class="form-group">
+          <label>4. 当前剩余水量</label>
+          <div class="input-row">
+            <input
+              type="number"
+              id="w_h"
+              placeholder="时"
+              value="0"
+              min="0"
+              oninput="calculate()"
+            />
+            <span class="input-addon">时</span>
+            <input
+              type="number"
+              id="w_m"
+              placeholder="分"
+              value="0"
+              min="0"
+              max="59"
+              oninput="calculate()"
+            />
+            <span class="input-addon">分</span>
+          </div>
+        </div>
 
-        <div class="card" style="text-align: center; margin-top: 30px; padding: 30px 20px; background: linear-gradient(145deg, #ffffff, #f9f9f9);">
-            <div style="font-size: 32px; margin-bottom: 10px;">☕</div>
-            <h3 style="margin: 0 0 10px 0; color: var(--text-main); font-size: 18px;">支持该项目</h3>
-            <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">
-                请作者喝杯咖啡。
-            </p>
-            
-            <button onclick="window.open('https://ifdian.net/a/gzchenjin', '_blank')" 
-                    style="background: var(--primary); color: white; border: none; padding: 12px 28px; border-radius: 25px; font-size: 15px; font-weight: bold; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 12px rgba(46, 125, 50, 0.2);">
-                ⚡ 前往爱发电赞助
+        <div id="resultPanel"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">📅 全周期播种排期器</h2>
+        <p style="font-size: 14px; color: var(--text-muted)">
+          种下瞬间一键排期，精准规划各次浇水闹钟。
+        </p>
+
+        <div class="form-group">
+          <label>1. 农作物总时长</label>
+          <div class="btn-group">
+            <button
+              type="button"
+              class="time-btn"
+              onclick="setDuration(60, this)"
+            >
+              1 小时
             </button>
+            <button
+              type="button"
+              class="time-btn"
+              onclick="setDuration(480, this)"
+            >
+              8 小时
+            </button>
+            <button
+              type="button"
+              class="time-btn active"
+              onclick="setDuration(960, this)"
+            >
+              16 小时
+            </button>
+            <button
+              type="button"
+              class="time-btn"
+              onclick="setDuration(1920, this)"
+            >
+              32 小时
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>2. 实际种下时间</label>
+          <input
+            type="datetime-local"
+            id="plantTime"
+            onchange="generateTimeline()"
+          />
+        </div>
+
+        <div id="timelinePanel" style="display: none; margin-top: 25px">
+          <div class="timeline-container">
+            <div
+              class="timeline-card"
+              style="border-top: 4px solid var(--primary)"
+            >
+              <div style="font-size: 22px; margin-bottom: 4px">🌱</div>
+              <div
+                style="
+                  font-size: 12px;
+                  font-weight: bold;
+                  color: var(--text-main);
+                  margin-bottom: 4px;
+                "
+              >
+                种下
+              </div>
+              <div
+                id="time1"
+                style="
+                  font-size: 14px;
+                  font-weight: bold;
+                  color: var(--primary);
+                "
+              >
+                --:--
+              </div>
+              <div
+                style="
+                  font-size: 11px;
+                  color: var(--text-muted);
+                  margin-top: 4px;
+                "
+              >
+                立刻浇水
+              </div>
+            </div>
+            <div
+              class="timeline-card"
+              style="border-top: 4px solid var(--secondary)"
+            >
+              <div style="font-size: 22px; margin-bottom: 4px">💧</div>
+              <div
+                style="
+                  font-size: 12px;
+                  font-weight: bold;
+                  color: var(--text-main);
+                  margin-bottom: 4px;
+                "
+              >
+                第2次
+              </div>
+              <div
+                id="time2"
+                style="
+                  font-size: 14px;
+                  font-weight: bold;
+                  color: var(--secondary);
+                "
+              >
+                --:--
+              </div>
+              <div
+                id="offset2"
+                style="
+                  font-size: 11px;
+                  color: var(--text-muted);
+                  margin-top: 2px;
+                "
+              ></div>
+              <div id="alarmBox2"></div>
+            </div>
+            <div
+              class="timeline-card"
+              style="border-top: 4px solid var(--secondary)"
+            >
+              <div style="font-size: 22px; margin-bottom: 4px">💧</div>
+              <div
+                style="
+                  font-size: 12px;
+                  font-weight: bold;
+                  color: var(--text-main);
+                  margin-bottom: 4px;
+                "
+              >
+                第3次
+              </div>
+              <div
+                id="time3"
+                style="
+                  font-size: 14px;
+                  font-weight: bold;
+                  color: var(--secondary);
+                "
+              >
+                --:--
+              </div>
+              <div
+                id="offset3"
+                style="
+                  font-size: 11px;
+                  color: var(--text-muted);
+                  margin-top: 2px;
+                "
+              ></div>
+              <div id="alarmBox3"></div>
+            </div>
+            <div
+              class="timeline-card"
+              style="
+                border-top: 4px solid var(--danger);
+                background-color: #fffaf0;
+              "
+            >
+              <div style="font-size: 22px; margin-bottom: 4px">🔥</div>
+              <div
+                style="
+                  font-size: 12px;
+                  font-weight: bold;
+                  color: var(--danger);
+                  margin-bottom: 4px;
+                "
+              >
+                终极秒熟
+              </div>
+              <div
+                id="time4"
+                style="font-size: 14px; font-weight: bold; color: var(--danger)"
+              >
+                --:--
+              </div>
+              <div
+                id="offset4"
+                style="
+                  font-size: 11px;
+                  color: var(--danger);
+                  margin-top: 2px;
+                  opacity: 0.85;
+                "
+              ></div>
+              <div id="alarmBox4"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <div
+        class="card"
+        style="
+          margin-top: 20px;
+          padding: 20px;
+          background: linear-gradient(145deg, #ffffff, #f9f9f9);
+        "
+      >
+        <div style="text-align: center; margin-bottom: 16px;">
+            <h3 style="margin: 0 0 6px 0; color: var(--text-main); font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <span style="font-size: 20px;">☕</span> 请作者喝杯咖啡。
+            </h3>
+            <p style="margin: 0; font-size: 12px; color: var(--text-muted);">
+                本工具完全免费，如果为你节省了时间，欢迎随意打赏
+            </p>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: stretch; gap: 15px;">
             
-            <div style="margin-top: 15px; font-size: 10px; color: #aaa;">
-                资金由爱发电平台提供企业级风控与合规保障
+            <div style="flex: 1; min-width: 200px; padding: 16px 12px; background: white; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <div style="font-size: 14px; font-weight: bold; color: #d84315; margin-bottom: 10px;">🍬 微信赞赏码</div>
+                <img src="reward.png" alt="微信赞赏" style="width: 120px; height: 120px; border-radius: 8px; border: 1px solid #f0f0f0;">
+                <div style="margin-top: 8px; font-size: 11px; color: #999;">手机端可保存图片后扫码</div>
             </div>
-        </div>
 
-
-
-
-
-
-
-
-
-
-        <div class="card">
-            <h2 class="card-title">📈 高阶作物图鉴与收益数据 (点击表头可排序)</h2>
-            <p style="font-size: 14px; color: var(--text-muted);">注：基于单价与经验的综合性价比分析。已收录至最新 46 级数据，排除了无意义种植，助你精准避坑。</p>
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th onclick="sortTable('level')">解锁等级 ↕</th>
-                            <th onclick="sortTable('name')">农作物 ↕</th>
-                            <th onclick="sortTable('time')">总时长 ↕</th>
-                            <th onclick="sortTable('unitExp')">单位经验(*10k) ↕</th>
-                            <th onclick="sortTable('unitPrice')">单位金币 ↕</th>
-                            <th onclick="sortTable('advice')">种植建议 ↕</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                    </tbody>
-                </table>
+            <div style="display: flex; align-items: center; justify-content: center; color: #bbb; font-size: 14px; font-weight: bold;">
+                或
             </div>
-        </div>
 
+            <div style="flex: 1; min-width: 200px; padding: 16px 12px; background: white; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <div style="font-size: 14px; font-weight: bold; color: var(--primary); margin-bottom: 20px;">⚡ 爱发电平台</div>
+                <button
+                    onclick="window.open('https://ifdian.net/a/gzchenjin', '_blank')"
+                    style="
+                        background: var(--primary);
+                        color: white;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 25px;
+                        font-size: 14px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        transition: transform 0.2s, box-shadow 0.2s;
+                        box-shadow: 0 4px 12px rgba(46, 125, 50, 0.2);
+                        width: 90%;
+                    "
+                >
+                    前往爱发电
+                </button>
+                <div style="margin-top: 20px; font-size: 11px; color: #aaa; line-height: 1.5; text-align: center;">
+                    支持多种支付方式
+                </div>
+            </div>
+
+        </div>
+      </div>
+
+
+
+
+      <div class="card">
+        <h2 class="card-title">📈 高阶作物图鉴与收益数据 (点击表头可排序)</h2>
+        <p style="font-size: 14px; color: var(--text-muted)">
+          注：基于单价与经验的综合性价比分析。已收录至最新 46
+          级数据，排除了无意义种植，助你精准避坑。
+        </p>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th onclick="sortTable('level')">解锁等级 ↕</th>
+                <th onclick="sortTable('name')">农作物 ↕</th>
+                <th onclick="sortTable('time')">总时长 ↕</th>
+                <th onclick="sortTable('unitExp')">单位经验(*10k) ↕</th>
+                <th onclick="sortTable('unitPrice')">单位金币 ↕</th>
+                <th onclick="sortTable('advice')">种植建议 ↕</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
+    <div
+      style="
+        text-align: center;
+        margin-top: 30px;
+        margin-bottom: 20px;
+        color: var(--text-muted);
+        font-size: 14px;
+      "
+    >
+      <span id="busuanzi_container_site_pv">
+        👀 务农系统总运转
+        <span
+          id="busuanzi_value_site_pv"
+          style="font-weight: bold; color: var(--primary)"
+        ></span>
+        次
+      </span>
+      <span style="margin: 0 10px">|</span>
+      <span id="busuanzi_container_site_uv">
+        👤 累计服务农场主
+        <span
+          id="busuanzi_value_site_uv"
+          style="font-weight: bold; color: var(--primary)"
+        ></span>
+        人
+      </span>
     </div>
-    <div style="text-align: center; margin-top: 30px; margin-bottom: 20px; color: var(--text-muted); font-size: 14px;">
-        <span id="busuanzi_container_site_pv">
-            👀 务农系统总运转 <span id="busuanzi_value_site_pv" style="font-weight: bold; color: var(--primary);"></span> 次
-        </span>
-        <span style="margin: 0 10px;">|</span>
-        <span id="busuanzi_container_site_uv">
-            👤 累计服务农场主 <span id="busuanzi_value_site_uv" style="font-weight: bold; color: var(--primary);"></span> 人
-        </span>
-    </div>
-    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <script
+      async
+      src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"
+    ></script>
 
     <script>
-        // --- 极限计算器逻辑 ---
-        function fillTotalTime() {
-            const select = document.getElementById('cropSelect').value;
-            const [h, m] = select.split(',');
-            document.getElementById('t_h').value = h;
+      // --- 极限计算器逻辑 ---
+      function fillTotalTime() {
+        const select = document.getElementById("cropSelect").value;
+        const [h, m] = select.split(",");
+        document.getElementById("t_h").value = h;
 
-            const tmInput = document.getElementById('t_m');
-            if (tmInput) {
-                tmInput.value = m;
-            }
-            calculate();
+        const tmInput = document.getElementById("t_m");
+        if (tmInput) {
+          tmInput.value = m;
+        }
+        calculate();
+      }
+
+      function formatDuration(minutes) {
+        const h = Math.floor(minutes / 60);
+        const m = Math.floor(minutes % 60);
+        if (h === 0 && m === 0) return "0 分钟";
+        let res = "";
+        if (h > 0) res += h + " 小时 ";
+        if (m > 0) res += m + " 分钟";
+        return res;
+      }
+
+      function formatClockTime(date) {
+        const h = date.getHours().toString().padStart(2, "0");
+        const m = date.getMinutes().toString().padStart(2, "0");
+        return `${h}:${m}`;
+      }
+
+      function calculate() {
+        const th = parseInt(document.getElementById("t_h").value) || 0;
+        const tmInput = document.getElementById("t_m");
+        const tm = tmInput ? parseInt(tmInput.value) || 0 : 0;
+        const rh = parseInt(document.getElementById("r_h").value) || 0;
+        const rm = parseInt(document.getElementById("r_m").value) || 0;
+        const wh = parseInt(document.getElementById("w_h").value) || 0;
+        const wm = parseInt(document.getElementById("w_m").value) || 0;
+
+        const T = th * 60 + tm;
+        const R = rh * 60 + rm;
+        const W = wh * 60 + wm;
+
+        const panel = document.getElementById("resultPanel");
+
+        if (T === 0 || R === 0) {
+          panel.style.display = "none";
+          return;
         }
 
-        function formatDuration(minutes) {
-            const h = Math.floor(minutes / 60);
-            const m = Math.floor(minutes % 60);
-            if (h === 0 && m === 0) return "0 分钟";
-            let res = "";
-            if (h > 0) res += h + " 小时 ";
-            if (m > 0) res += m + " 分钟";
-            return res;
-        }
+        panel.style.display = "block";
 
-        function formatClockTime(date) {
-            const h = date.getHours().toString().padStart(2, '0');
-            const m = date.getMinutes().toString().padStart(2, '0');
-            return `${h}:${m}`;
-        }
-
-       function calculate() {
-            const th = parseInt(document.getElementById('t_h').value) || 0;
-            const tmInput = document.getElementById('t_m');
-            const tm = tmInput ? (parseInt(tmInput.value) || 0) : 0;
-            const rh = parseInt(document.getElementById('r_h').value) || 0;
-            const rm = parseInt(document.getElementById('r_m').value) || 0;
-            const wh = parseInt(document.getElementById('w_h').value) || 0;
-            const wm = parseInt(document.getElementById('w_m').value) || 0;
-
-            const T = th * 60 + tm;
-            const R = rh * 60 + rm;
-            const W = wh * 60 + wm;
-
-            const panel = document.getElementById('resultPanel');
-
-            if (T === 0 || R === 0) {
-                panel.style.display = 'none';
-                return;
-            }
-
-            panel.style.display = 'block';
-
-            // ================= 风控拦截 1：剩余时间异常 =================
-            if (R > T) {
-                panel.className = 'alert-danger';
-                panel.innerHTML = `
+        // ================= 风控拦截 1：剩余时间异常 =================
+        if (R > T) {
+          panel.className = "alert-danger";
+          panel.innerHTML = `
                 <strong style="font-size: 18px;">❌ 输入数据异常</strong><br>
                 剩余时间（<strong>${formatDuration(R)}</strong>）不可能大于植物总时间（<strong>${formatDuration(T)}</strong>）。<br>
                 👉 <strong>请核实输入：</strong>您可能填反了或者看错行了。
                 `;
-                return;
-            }
+          return;
+        }
 
-            const M = T / 3;
+        const M = T / 3;
 
-            // ================= 风控拦截 2：剩余水量异常 =================
-            if (W > M) {
-                panel.className = 'alert-danger';
-                panel.innerHTML = `
+        // ================= 风控拦截 2：剩余水量异常 =================
+        if (W > M) {
+          panel.className = "alert-danger";
+          panel.innerHTML = `
                 <strong style="font-size: 18px;">❌ 输入数据异常</strong><br>
                 当前水量（<strong>${formatDuration(W)}</strong>）超过了该植物的水缸物理上限（<strong>${formatDuration(M)}</strong>）。<br>
                 👉 <strong>请核实输入：</strong>水滴上的时间绝不可能超过 ${formatDuration(M)}。
                 `;
-                return;
+          return;
+        }
+
+        // ================= 真理推演引擎 =================
+        const limit = W + M / 4;
+
+        if (R > limit) {
+          let currR = R;
+          let currW = W;
+          let passed = 0;
+          let actions = [];
+
+          while (currR > currW + M / 4) {
+            if (currW > 0) {
+              passed += currW;
+              currR -= currW;
+              actions.push({
+                type: "water",
+                offset: Math.round(passed),
+                title: "💧 储水干涸，需补满水",
+              });
+              currW = M;
+              currR -= M / 4;
+            } else {
+              actions.push({
+                type: "water",
+                offset: Math.round(passed),
+                title: "💧 尚未浇水，请立刻补水！",
+              });
+              currW = M;
+              currR -= M / 4;
             }
+          }
 
-            // ================= 真理推演引擎 =================
-            const limit = W + (M / 4);
+          // 核心修复：推演结束后的最后一击，加入门槛判定
+          let mathWait = (4 * currR - M + currW) / 5;
+          let unlockWait = M * 0.1 - (M - currW); // 按键解锁需要的时间
 
-            if (R > limit) {
-                let currR = R;
-                let currW = W;
-                let passed = 0;
-                let actions = [];
+          // 真实等待时间 = 理论值与解锁值取最大，并向上取整确保绝对跨过门槛
+          let finalWait = Math.max(mathWait, unlockWait);
+          finalWait = Math.max(0, Math.ceil(finalWait));
 
-                while (currR > currW + (M / 4)) {
-                    if (currW > 0) {
-                        passed += currW;
-                        currR -= currW; 
-                        actions.push({ type: 'water', offset: Math.round(passed), title: '💧 储水干涸，需补满水' });
-                        currW = M;
-                        currR -= (M / 4); 
-                    } else {
-                        actions.push({ type: 'water', offset: Math.round(passed), title: '💧 尚未浇水，请立刻补水！' });
-                        currW = M;
-                        currR -= (M / 4);
-                    }
-                }
+          // 终极判定：如果强行等按键亮起，植物早就熟了，那就标记为自然成熟
+          if (finalWait >= currR) {
+            passed += currR;
+            actions.push({
+              type: "kill",
+              offset: Math.round(passed),
+              title: "🌾 完美收官！自然成熟！",
+            });
+          } else {
+            passed += finalWait;
+            actions.push({
+              type: "kill",
+              offset: Math.round(passed),
+              title: "🔥 终极秒熟！马上浇水收割！",
+            });
+          }
 
-                // 核心修复：推演结束后的最后一击，加入门槛判定
-                let mathWait = (4 * currR - M + currW) / 5;
-                let unlockWait = (M * 0.1) - (M - currW); // 按键解锁需要的时间
-                
-                // 真实等待时间 = 理论值与解锁值取最大，并向上取整确保绝对跨过门槛
-                let finalWait = Math.max(mathWait, unlockWait);
-                finalWait = Math.max(0, Math.ceil(finalWait));
+          const now = new Date();
+          let html = `<strong style="font-size: 16px;">⏳ 尚未进入斩杀线，后续排期如下：</strong><br>`;
+          html += `<ul style="margin: 10px 0; padding-left: 20px; font-size: 14px; color: var(--text-main);">`;
 
-                // 终极判定：如果强行等按键亮起，植物早就熟了，那就标记为自然成熟
-                if (finalWait >= currR) {
-                    passed += currR;
-                    actions.push({ type: 'kill', offset: Math.round(passed), title: '🌾 完美收官！自然成熟！' });
-                } else {
-                    passed += finalWait;
-                    actions.push({ type: 'kill', offset: Math.round(passed), title: '🔥 终极秒熟！马上浇水收割！' });
-                }
+          actions.forEach((act) => {
+            const actTime = new Date(now.getTime() + act.offset * 60000);
+            const dayPrefix =
+              actTime.getDate() !== now.getDate() ? "明天 " : "今天 ";
+            const timeStr = `${dayPrefix}${formatClockTime(actTime)}`;
+            const durationStr =
+              act.offset === 0 ? "现在" : formatDuration(act.offset) + "后";
 
-                const now = new Date();
-                let html = `<strong style="font-size: 16px;">⏳ 尚未进入斩杀线，后续排期如下：</strong><br>`;
-                html += `<ul style="margin: 10px 0; padding-left: 20px; font-size: 14px; color: var(--text-main);">`;
-                
-                actions.forEach(act => {
-                    const actTime = new Date(now.getTime() + act.offset * 60000);
-                    const dayPrefix = actTime.getDate() !== now.getDate() ? "明天 " : "今天 ";
-                    const timeStr = `${dayPrefix}${formatClockTime(actTime)}`;
-                    const durationStr = act.offset === 0 ? "现在" : formatDuration(act.offset) + "后";
-                    
-                    if (act.type === 'water') {
-                        html += `<li style="margin-bottom: 6px;">${durationStr} <strong>(${timeStr})</strong><br><span style="color: var(--secondary); font-weight: bold;">${act.title}</span></li>`;
-                    } else {
-                        html += `<li style="margin-bottom: 6px;">${durationStr} <strong>(${timeStr})</strong><br><span style="color: var(--danger); font-weight: bold;">${act.title}</span></li>`;
-                    }
-                });
-                html += `</ul>`;
-
-                const nextAct = actions[0];
-                const nextTime = now.getTime() + nextAct.offset * 60000;
-                const alarmTitle = nextAct.type === 'kill' ? '农场秒熟收割' : '农场加水提醒';
-                html += `<button class="alarm-btn" style="margin-top: 5px;" onclick="createAlarm('${alarmTitle}', ${nextTime})">⏰ 为下一次操作设日历</button>`;
-
-                panel.className = 'alert-warning';
-                panel.innerHTML = html;
-                return;
+            if (act.type === "water") {
+              html += `<li style="margin-bottom: 6px;">${durationStr} <strong>(${timeStr})</strong><br><span style="color: var(--secondary); font-weight: bold;">${act.title}</span></li>`;
+            } else {
+              html += `<li style="margin-bottom: 6px;">${durationStr} <strong>(${timeStr})</strong><br><span style="color: var(--danger); font-weight: bold;">${act.title}</span></li>`;
             }
+          });
+          html += `</ul>`;
 
-            // ================= 斩杀线内的门槛完美兼容 =================
-            let mathWait = (4 * R - M + W) / 5;
-            let unlockWait = (M * 0.1) - (M - W);
-            
-            // 核心修复：真实等待时间，取两者的最大值，向上取整
-            let waitMins = Math.max(mathWait, unlockWait);
-            waitMins = Math.max(0, Math.ceil(waitMins));
+          const nextAct = actions[0];
+          const nextTime = now.getTime() + nextAct.offset * 60000;
+          const alarmTitle =
+            nextAct.type === "kill" ? "农场秒熟收割" : "农场加水提醒";
+          html += `<button class="alarm-btn" style="margin-top: 5px;" onclick="createAlarm('${alarmTitle}', ${nextTime})">⏰ 为下一次操作设日历</button>`;
 
-            // 如果为了等按键亮起花的时间，比植物自然成熟还慢，那才是真正的“卡门槛”
-            if (waitMins >= R) {
-                panel.className = 'alert-warning';
-                panel.innerHTML = `
+          panel.className = "alert-warning";
+          panel.innerHTML = html;
+          return;
+        }
+
+        // ================= 斩杀线内的门槛完美兼容 =================
+        let mathWait = (4 * R - M + W) / 5;
+        let unlockWait = M * 0.1 - (M - W);
+
+        // 核心修复：真实等待时间，取两者的最大值，向上取整
+        let waitMins = Math.max(mathWait, unlockWait);
+        waitMins = Math.max(0, Math.ceil(waitMins));
+
+        // 如果为了等按键亮起花的时间，比植物自然成熟还慢，那才是真正的“卡门槛”
+        if (waitMins >= R) {
+          panel.className = "alert-warning";
+          panel.innerHTML = `
                 <strong>⚠️ 卡 10% 补水门槛</strong><br>
                 等待浇水按键亮起的时间（${formatDuration(waitMins)}）已经大于等于自然成熟的时间（${formatDuration(R)}）。<br>
                 👉 <strong>建议：</strong>无须操作，让植物自然成熟即可。
                 `;
-                return;
-            }
+          return;
+        }
 
-            if (waitMins === 0) {
-                panel.className = 'alert-success';
-                panel.innerHTML = `
+        if (waitMins === 0) {
+          panel.className = "alert-success";
+          panel.innerHTML = `
                 <strong style="font-size: 20px;">🔥 马上浇水！直接秒熟！</strong><br>
                 不用等了，现在按下浇水键，植物瞬间成熟！
                 `;
-            } else {
-                const now = new Date();
-                const alarmTime = new Date(now.getTime() + waitMins * 60000);
-                const isTomorrow = alarmTime.getDate() !== now.getDate();
-                const dayPrefix = isTomorrow ? "明天 " : "今天 ";
+        } else {
+          const now = new Date();
+          const alarmTime = new Date(now.getTime() + waitMins * 60000);
+          const isTomorrow = alarmTime.getDate() !== now.getDate();
+          const dayPrefix = isTomorrow ? "明天 " : "今天 ";
 
-                panel.className = 'alert-success';
-                panel.innerHTML = `
+          panel.className = "alert-success";
+          panel.innerHTML = `
                 <strong>✅ 完美收割时机</strong><br>
                 你需要精确等待：<strong>${formatDuration(waitMins)}</strong><br>
                 <span class="alarm-time">⏰ 闹钟设定为：${dayPrefix}${formatClockTime(alarmTime)}</span>
                 在此时间点，浇水按键将刚好亮起，按下瞬间成熟！
                 `;
-                panel.innerHTML += `<button class="alarm-btn" style="margin-top: 10px;" onclick="createAlarm('农场秒熟收割', ${alarmTime.getTime()})">⏰ 为本次操作设日历</button>`;
-            }
+          panel.innerHTML += `<button class="alarm-btn" style="margin-top: 10px;" onclick="createAlarm('农场秒熟收割', ${alarmTime.getTime()})">⏰ 为本次操作设日历</button>`;
+        }
+      }
+
+      // 初始化当前时间
+      window.addEventListener("DOMContentLoaded", (event) => {
+        const now = new Date();
+        // 格式化为 datetime-local 需要的 YYYY-MM-DDThh:mm 格式
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById("plantTime").value = now
+          .toISOString()
+          .slice(0, 16);
+        generateTimeline();
+      });
+
+      function formatMinsToText(mins) {
+        const h = Math.floor(mins / 60);
+        const m = Math.floor(mins % 60);
+        return (h > 0 ? h + "h" : "") + (m > 0 ? m + "m" : "");
+      }
+
+      function formatDisplayDate(dateObj) {
+        const mm = (dateObj.getMonth() + 1).toString().padStart(2, "0");
+        const dd = dateObj.getDate().toString().padStart(2, "0");
+        const hh = dateObj.getHours().toString().padStart(2, "0");
+        const min = dateObj.getMinutes().toString().padStart(2, "0");
+        return `${mm}-${dd} ${hh}:${min}`;
+      }
+
+      window.currentDurationMins = 960; // 默认16小时
+      function setDuration(mins, btnElement) {
+        window.currentDurationMins = mins;
+        const btns = document.querySelectorAll(".time-btn");
+        btns.forEach((btn) => btn.classList.remove("active"));
+        btnElement.classList.add("active");
+        generateTimeline();
+      }
+
+      // ================= 极简日历方案 (拒绝下载文件，不行就拉倒) =================
+      function createAlarm(title, timestamp) {
+        const start = new Date(timestamp);
+        const end = new Date(timestamp + 5 * 60000); // 持续 5 分钟
+        const eventTitle = `🌾 ${title}`;
+        const details = "提醒：储水已干 / 极限秒熟，马上浇水！";
+
+        const ua = navigator.userAgent.toLowerCase();
+        const isWeChat = ua.includes("micromessenger");
+        // 修复：兼容 iPhone，并精准识别伪装成 Mac 桌面模式的 iPad，放行所有 iOS 浏览器 (含 Chrome)
+        const isIOS =
+          /ipad|iphone|ipod/.test(ua) ||
+          (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+        // 1. 微信环境：被劫持，指引跳出
+        if (isWeChat) {
+          alert("⚠️ 微信、安卓无法使用该功能");
+          return;
         }
 
-
-
-
-        // 初始化当前时间
-        window.addEventListener('DOMContentLoaded', (event) => {
-            const now = new Date();
-            // 格式化为 datetime-local 需要的 YYYY-MM-DDThh:mm 格式
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            document.getElementById('plantTime').value = now.toISOString().slice(0, 16);
-            generateTimeline();
-        });
-
-        function formatMinsToText(mins) {
-            const h = Math.floor(mins / 60);
-            const m = Math.floor(mins % 60);
-            return (h > 0 ? h + "h" : "") + (m > 0 ? m + "m" : "");
+        // 2. 苹果 iOS：无下载行为，借用接口完美拉起系统自带的添加卡片
+        if (isIOS) {
+          const fmt = (d) =>
+            d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+          const url = `https://ics.agical.io/?subject=${encodeURIComponent(eventTitle)}&description=${encodeURIComponent(details)}&dtstart=${fmt(start)}&dtend=${fmt(end)}&reminder=0`;
+          window.location.href = url;
+          return;
         }
 
-        function formatDisplayDate(dateObj) {
-            const mm = (dateObj.getMonth() + 1).toString().padStart(2, '0');
-            const dd = dateObj.getDate().toString().padStart(2, '0');
-            const hh = dateObj.getHours().toString().padStart(2, '0');
-            const min = dateObj.getMinutes().toString().padStart(2, '0');
-            return `${mm}-${dd} ${hh}:${min}`;
-        }
+        // 3. 安卓与电脑端：坚决不下载文件，直接告知无法设置
+        alert("💡 安卓无法使用该功能，手动定个闹钟吧！");
+      }
 
-        window.currentDurationMins = 960; // 默认16小时
-        function setDuration(mins, btnElement) {
-            window.currentDurationMins = mins;
-            const btns = document.querySelectorAll('.time-btn');
-            btns.forEach(btn => btn.classList.remove('active'));
-            btnElement.classList.add('active');
-            generateTimeline();
-        }
+      function generateTimeline() {
+        const plantInput = document.getElementById("plantTime").value;
+        if (!plantInput) return;
 
-        // ================= 极简日历方案 (拒绝下载文件，不行就拉倒) =================
-        function createAlarm(title, timestamp) {
-            const start = new Date(timestamp);
-            const end = new Date(timestamp + 5 * 60000); // 持续 5 分钟
-            const eventTitle = `🌾 ${title}`;
-            const details = '提醒：储水已干 / 极限秒熟，马上浇水！';
+        const startTime = new Date(plantInput);
+        const duration = window.currentDurationMins;
 
-            const ua = navigator.userAgent.toLowerCase();
-            const isWeChat = ua.includes('micromessenger');
-            // 修复：兼容 iPhone，并精准识别伪装成 Mac 桌面模式的 iPad，放行所有 iOS 浏览器 (含 Chrome)
-            const isIOS = /ipad|iphone|ipod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        // 核心推演公式 (分钟)
+        const m2 = duration / 3;
+        const m3 = (2 * duration) / 3;
+        const m4 = (11 * duration) / 15;
 
-            // 1. 微信环境：被劫持，指引跳出
-            if (isWeChat) {
-                alert("⚠️ 微信、安卓无法使用该功能");
-                return;
-            }
+        // 计算具体时间戳
+        const t1 = startTime;
+        const t2 = new Date(startTime.getTime() + m2 * 60000);
+        const t3 = new Date(startTime.getTime() + m3 * 60000);
+        const t4 = new Date(startTime.getTime() + m4 * 60000);
 
-            // 2. 苹果 iOS：无下载行为，借用接口完美拉起系统自带的添加卡片
-            if (isIOS) {
-                const fmt = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-                const url = `https://ics.agical.io/?subject=${encodeURIComponent(eventTitle)}&description=${encodeURIComponent(details)}&dtstart=${fmt(start)}&dtend=${fmt(end)}&reminder=0`;
-                window.location.href = url;
-                return;
-            }
+        // 渲染到界面
+        document.getElementById("timelinePanel").style.display = "block";
 
-            // 3. 安卓与电脑端：坚决不下载文件，直接告知无法设置
-            alert("💡 安卓无法使用该功能，手动定个闹钟吧！");
-        }
+        document.getElementById("time1").innerText = formatDisplayDate(t1);
 
+        document.getElementById("time2").innerText = formatDisplayDate(t2);
+        document.getElementById("offset2").innerText =
+          `种下后 +${formatMinsToText(m2)}`;
 
-        function generateTimeline() {
-            const plantInput = document.getElementById('plantTime').value;
-            if (!plantInput) return;
+        document.getElementById("time3").innerText = formatDisplayDate(t3);
+        document.getElementById("offset3").innerText =
+          `种下后 +${formatMinsToText(m3)}`;
 
-            const startTime = new Date(plantInput);
-            const duration = window.currentDurationMins;
+        document.getElementById("time4").innerText = formatDisplayDate(t4);
+        document.getElementById("offset4").innerText =
+          `完美收割！${formatMinsToText(m4)}`;
 
-            // 核心推演公式 (分钟)
-            const m2 = duration / 3;
-            const m3 = (2 * duration) / 3;
-            const m4 = (11 * duration) / 15;
+        // 渲染一键设置日历按钮
+        document.getElementById("alarmBox2").innerHTML =
+          `<button class="alarm-btn" onclick="createAlarm('第2次补水', ${t2.getTime()})">⏰ 设日历提醒</button>`;
+        document.getElementById("alarmBox3").innerHTML =
+          `<button class="alarm-btn" onclick="createAlarm('第3次补水', ${t3.getTime()})">⏰ 设日历提醒</button>`;
+        document.getElementById("alarmBox4").innerHTML =
+          `<button class="alarm-btn alarm-btn-danger" onclick="createAlarm('🔥 终极秒熟收割', ${t4.getTime()})">⏰ 设日历提醒</button>`;
+      }
 
-            // 计算具体时间戳
-            const t1 = startTime;
-            const t2 = new Date(startTime.getTime() + m2 * 60000);
-            const t3 = new Date(startTime.getTime() + m3 * 60000);
-            const t4 = new Date(startTime.getTime() + m4 * 60000);
+      // --- 动态数据表逻辑 (更新至 46 级) ---
+      const cropData = [
+        {
+          level: 1,
+          name: "🌾 小麦",
+          time: 30,
+          unitExp: 333.33,
+          unitPrice: 10.0,
+          advice: "前期基础",
+        },
+        {
+          level: 2,
+          name: "🥕 胡萝卜",
+          time: 120,
+          unitExp: 500.0,
+          unitPrice: 8.33,
+          advice: "前期基础",
+        },
+        {
+          level: 3,
+          name: "🍅 番茄",
+          time: 300,
+          unitExp: 500.0,
+          unitPrice: 8.33,
+          advice: "前期基础",
+        },
+        {
+          level: 5,
+          name: "🍄 蘑菇",
+          time: 1200,
+          unitExp: 500.0,
+          unitPrice: 11.67,
+          advice: "前期基础",
+        },
+        {
+          level: 6,
+          name: "🥔 土豆",
+          time: 3600,
+          unitExp: 500.0,
+          unitPrice: 12.78,
+          advice: "前期基础",
+        },
+        {
+          level: 8,
+          name: "🌽 玉米",
+          time: 28800,
+          unitExp: 529.86,
+          unitPrice: 11.88,
+          advice: "新手期核心作物",
+        },
+        {
+          level: 10,
+          name: "🍓 草莓",
+          time: 57600,
+          unitExp: 544.97,
+          unitPrice: 10.17,
+          advice: "长线挂机",
+        },
+        {
+          level: 12,
+          name: "🌻 向日葵",
+          time: 3600,
+          unitExp: 561.11,
+          unitPrice: 13.33,
+          advice: "中期过渡",
+        },
+        {
+          level: 14,
+          name: "🫑 青椒",
+          time: 28800,
+          unitExp: 575.0,
+          unitPrice: 12.24,
+          advice: "常规睡前种植",
+        },
+        {
+          level: 16,
+          name: "🧄 大蒜",
+          time: 57600,
+          unitExp: 589.93,
+          unitPrice: 10.47,
+          advice: "长线挂机",
+        },
+        {
+          level: 18,
+          name: "🍌 香蕉",
+          time: 57600,
+          unitExp: 0.17,
+          unitPrice: 33.54,
+          advice: "💰 经验黑洞，谨慎种植",
+        },
+        {
+          level: 20,
+          name: "🫐 蓝莓",
+          time: 115200,
+          unitExp: 619.97,
+          unitPrice: 7.81,
+          advice: "超长线冲级备选",
+        },
+        {
+          level: 22,
+          name: "🥒 黄瓜",
+          time: 3600,
+          unitExp: 636.11,
+          unitPrice: 15.28,
+          advice: "🌟 黄金性价比",
+        },
+        {
+          level: 24,
+          name: "🍆 茄子",
+          time: 28800,
+          unitExp: 650.0,
+          unitPrice: 14.27,
+          advice: "🌟 睡前优选",
+        },
+        {
+          level: 26,
+          name: "🎃 南瓜",
+          time: 57600,
+          unitExp: 664.93,
+          unitPrice: 12.24,
+          advice: "长线挂机",
+        },
+        {
+          level: 28,
+          name: "🍊 柚子",
+          time: 57600,
+          unitExp: 0.17,
+          unitPrice: 39.15,
+          advice: "💰 经验黑洞，谨慎种植",
+        },
+        {
+          level: 30,
+          name: "🥬 卷心菜",
+          time: 115200,
+          unitExp: 694.97,
+          unitPrice: 9.11,
+          advice: "纯挂机冲级",
+        },
+        {
+          level: 32,
+          name: "🌱 萝卜",
+          time: 3600,
+          unitExp: 711.11,
+          unitPrice: 18.61,
+          advice: "🌟 新进阶性价比单品",
+        },
+        {
+          level: 34,
+          name: "🍇 葡萄",
+          time: 28800,
+          unitExp: 725.0,
+          unitPrice: 17.29,
+          advice: "🌟 进阶睡前优选",
+        },
+        {
+          level: 36,
+          name: "🥗 生菜",
+          time: 57600,
+          unitExp: 739.93,
+          unitPrice: 14.86,
+          advice: "长线收益稳健",
+        },
+        {
+          level: 38,
+          name: "🍉 西瓜",
+          time: 57600,
+          unitExp: 0.17,
+          unitPrice: 47.57,
+          advice: "💰 经验黑洞，谨慎种植",
+        },
+        {
+          level: 40,
+          name: "🌶️ 辣椒",
+          time: 115200,
+          unitExp: 769.97,
+          unitPrice: 11.08,
+          advice: "纯挂机终极冲级",
+        },
+        {
+          level: 42,
+          name: "🧅 洋葱",
+          time: 3600,
+          unitExp: 786.11,
+          unitPrice: 21.67,
+          advice: "👑 版本最强1小时单品",
+        },
+        {
+          level: 44,
+          name: "🥦 花菜",
+          time: 28800,
+          unitExp: 800.0,
+          unitPrice: 20.42,
+          advice: "👑 睡前最强真神",
+        },
+        {
+          level: 46,
+          name: "🥜 花生",
+          time: 57600,
+          unitExp: 814.93,
+          unitPrice: 17.45,
+          advice: "🌟 长线挂机天花板",
+        },
+      ];
 
-            // 渲染到界面
-            document.getElementById('timelinePanel').style.display = 'block';
+      let currentSort = { key: "level", asc: true };
 
-            document.getElementById('time1').innerText = formatDisplayDate(t1);
+      function formatTimeStr(seconds) {
+        if (seconds < 60) return seconds + " 秒";
+        if (seconds < 3600) return seconds / 60 + " 分钟";
+        return seconds / 3600 + " 小时";
+      }
 
-            document.getElementById('time2').innerText = formatDisplayDate(t2);
-            document.getElementById('offset2').innerText = `种下后 +${formatMinsToText(m2)}`;
+      function renderTable() {
+        const tbody = document.getElementById("tableBody");
+        tbody.innerHTML = "";
+        cropData.forEach((row) => {
+          const tr = document.createElement("tr");
+          tr.className = "row-hover";
 
-            document.getElementById('time3').innerText = formatDisplayDate(t3);
-            document.getElementById('offset3').innerText = `种下后 +${formatMinsToText(m3)}`;
+          // 样式分类逻辑
+          let rowStyle = "";
+          let adviceStyle = "";
+          if (row.advice.includes("🌟")) rowStyle = "pmo-star";
+          if (row.advice.includes("👑")) rowStyle = "pmo-crown"; // 版本真神特殊高亮
+          if (row.advice.includes("💰")) {
+            rowStyle = "pmo-warning";
+            adviceStyle = "color: var(--danger); font-weight: bold;";
+          }
 
-            document.getElementById('time4').innerText = formatDisplayDate(t4);
-            document.getElementById('offset4').innerText = `完美收割！${formatMinsToText(m4)}`;
-
-            // 渲染一键设置日历按钮
-            document.getElementById('alarmBox2').innerHTML = `<button class="alarm-btn" onclick="createAlarm('第2次补水', ${t2.getTime()})">⏰ 设日历提醒</button>`;
-            document.getElementById('alarmBox3').innerHTML = `<button class="alarm-btn" onclick="createAlarm('第3次补水', ${t3.getTime()})">⏰ 设日历提醒</button>`;
-            document.getElementById('alarmBox4').innerHTML = `<button class="alarm-btn alarm-btn-danger" onclick="createAlarm('🔥 终极秒熟收割', ${t4.getTime()})">⏰ 设日历提醒</button>`;
-        }
-
-        // --- 动态数据表逻辑 (更新至 46 级) ---
-        const cropData = [
-            { level: 1, name: '🌾 小麦', time: 30, unitExp: 333.33, unitPrice: 10.00, advice: '前期基础' },
-            { level: 2, name: '🥕 胡萝卜', time: 120, unitExp: 500.00, unitPrice: 8.33, advice: '前期基础' },
-            { level: 3, name: '🍅 番茄', time: 300, unitExp: 500.00, unitPrice: 8.33, advice: '前期基础' },
-            { level: 5, name: '🍄 蘑菇', time: 1200, unitExp: 500.00, unitPrice: 11.67, advice: '前期基础' },
-            { level: 6, name: '🥔 土豆', time: 3600, unitExp: 500.00, unitPrice: 12.78, advice: '前期基础' },
-            { level: 8, name: '🌽 玉米', time: 28800, unitExp: 529.86, unitPrice: 11.88, advice: '新手期核心作物' },
-            { level: 10, name: '🍓 草莓', time: 57600, unitExp: 544.97, unitPrice: 10.17, advice: '长线挂机' },
-            { level: 12, name: '🌻 向日葵', time: 3600, unitExp: 561.11, unitPrice: 13.33, advice: '中期过渡' },
-            { level: 14, name: '🫑 青椒', time: 28800, unitExp: 575.00, unitPrice: 12.24, advice: '常规睡前种植' },
-            { level: 16, name: '🧄 大蒜', time: 57600, unitExp: 589.93, unitPrice: 10.47, advice: '长线挂机' },
-            { level: 18, name: '🍌 香蕉', time: 57600, unitExp: 0.17, unitPrice: 33.54, advice: '💰 经验黑洞，谨慎种植' },
-            { level: 20, name: '🫐 蓝莓', time: 115200, unitExp: 619.97, unitPrice: 7.81, advice: '超长线冲级备选' },
-            { level: 22, name: '🥒 黄瓜', time: 3600, unitExp: 636.11, unitPrice: 15.28, advice: '🌟 黄金性价比' },
-            { level: 24, name: '🍆 茄子', time: 28800, unitExp: 650.00, unitPrice: 14.27, advice: '🌟 睡前优选' },
-            { level: 26, name: '🎃 南瓜', time: 57600, unitExp: 664.93, unitPrice: 12.24, advice: '长线挂机' },
-            { level: 28, name: '🍊 柚子', time: 57600, unitExp: 0.17, unitPrice: 39.15, advice: '💰 经验黑洞，谨慎种植' },
-            { level: 30, name: '🥬 卷心菜', time: 115200, unitExp: 694.97, unitPrice: 9.11, advice: '纯挂机冲级' },
-            { level: 32, name: '🌱 萝卜', time: 3600, unitExp: 711.11, unitPrice: 18.61, advice: '🌟 新进阶性价比单品' },
-            { level: 34, name: '🍇 葡萄', time: 28800, unitExp: 725.00, unitPrice: 17.29, advice: '🌟 进阶睡前优选' },
-            { level: 36, name: '🥗 生菜', time: 57600, unitExp: 739.93, unitPrice: 14.86, advice: '长线收益稳健' },
-            { level: 38, name: '🍉 西瓜', time: 57600, unitExp: 0.17, unitPrice: 47.57, advice: '💰 经验黑洞，谨慎种植' },
-            { level: 40, name: '🌶️ 辣椒', time: 115200, unitExp: 769.97, unitPrice: 11.08, advice: '纯挂机终极冲级' },
-            { level: 42, name: '🧅 洋葱', time: 3600, unitExp: 786.11, unitPrice: 21.67, advice: '👑 版本最强1小时单品' },
-            { level: 44, name: '🥦 花菜', time: 28800, unitExp: 800.00, unitPrice: 20.42, advice: '👑 睡前最强真神' },
-            { level: 46, name: '🥜 花生', time: 57600, unitExp: 814.93, unitPrice: 17.45, advice: '🌟 长线挂机天花板' }
-        ];
-
-        let currentSort = { key: 'level', asc: true };
-
-        function formatTimeStr(seconds) {
-            if (seconds < 60) return seconds + " 秒";
-            if (seconds < 3600) return (seconds / 60) + " 分钟";
-            return (seconds / 3600) + " 小时";
-        }
-
-        function renderTable() {
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
-            cropData.forEach(row => {
-                const tr = document.createElement('tr');
-                tr.className = 'row-hover';
-
-                // 样式分类逻辑
-                let rowStyle = "";
-                let adviceStyle = "";
-                if (row.advice.includes('🌟')) rowStyle = "pmo-star";
-                if (row.advice.includes('👑')) rowStyle = "pmo-crown"; // 版本真神特殊高亮
-                if (row.advice.includes('💰')) {
-                    rowStyle = "pmo-warning";
-                    adviceStyle = "color: var(--danger); font-weight: bold;";
-                }
-
-                tr.className = `row-hover ${rowStyle}`;
-                tr.innerHTML = `
+          tr.className = `row-hover ${rowStyle}`;
+          tr.innerHTML = `
                 <td>Lv. ${row.level}</td>
                 <td style="font-weight:bold;">${row.name}</td>
                 <td>${formatTimeStr(row.time)}</td>
-                <td class="${row.unitExp > 700 ? 'highlight-data' : ''}">${row.unitExp.toFixed(2)}</td>
-                <td class="${row.unitPrice > 16 ? 'highlight-data' : ''}">${row.unitPrice.toFixed(2)}</td>
+                <td class="${row.unitExp > 700 ? "highlight-data" : ""}">${row.unitExp.toFixed(2)}</td>
+                <td class="${row.unitPrice > 16 ? "highlight-data" : ""}">${row.unitPrice.toFixed(2)}</td>
                 <td style="${adviceStyle}">${row.advice}</td>
             `;
-                tbody.appendChild(tr);
-            });
+          tbody.appendChild(tr);
+        });
+      }
+
+      function sortTable(key) {
+        if (currentSort.key === key) {
+          currentSort.asc = !currentSort.asc;
+        } else {
+          currentSort.key = key;
+          currentSort.asc = false;
+          if (key === "level" || key === "time") currentSort.asc = true;
         }
 
-        function sortTable(key) {
-            if (currentSort.key === key) {
-                currentSort.asc = !currentSort.asc;
-            } else {
-                currentSort.key = key;
-                currentSort.asc = false;
-                if (key === 'level' || key === 'time') currentSort.asc = true;
-            }
-
-            cropData.sort((a, b) => {
-                let valA = a[key];
-                let valB = b[key];
-                if (valA < valB) return currentSort.asc ? -1 : 1;
-                if (valA > valB) return currentSort.asc ? 1 : -1;
-                return 0;
-            });
-            renderTable();
-        }
-
-        // 页面加载时渲染一次表格
-        // 直接执行渲染，不等待外部统计代码，彻底解决卡顿和空白
+        cropData.sort((a, b) => {
+          let valA = a[key];
+          let valB = b[key];
+          if (valA < valB) return currentSort.asc ? -1 : 1;
+          if (valA > valB) return currentSort.asc ? 1 : -1;
+          return 0;
+        });
         renderTable();
+      }
+
+      // 页面加载时渲染一次表格
+      // 直接执行渲染，不等待外部统计代码，彻底解决卡顿和空白
+      renderTable();
     </script>
-
-</body>
-
+  </body>
 </html>
