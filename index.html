@@ -737,6 +737,7 @@
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('crops')">🌾 作物信息</button>
             <button class="tab-btn" onclick="switchTab('farm')">🏡 农场等级</button>
+            <button class="tab-btn" onclick="switchTab('upgrade')">⬆️ 作物升级</button>
             <button class="tab-btn" onclick="switchTab('stall')">🛒 小摊等级</button>
             <button class="tab-btn" onclick="switchTab('field')">🚜 农田开垦</button>
         </div>
@@ -781,6 +782,27 @@
             </table>
             </div>
         </div>
+
+
+        <div id="tab-upgrade" class="tab-content">
+            <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th style="position: sticky; left: 0; z-index: 2; background: var(--primary-light);">作物</th>
+                    <th>满级数量</th>
+                    <th>2级</th><th>3级</th><th>4级</th><th>5级</th><th>6级</th>
+                    <th>7级</th><th>8级</th><th>9级</th><th>10级</th>
+                </tr>
+                </thead>
+                <tbody id="upgradeTableBody"></tbody>
+            </table>
+            </div>
+        </div>
+
+
+
+
 
         <div id="tab-stall" class="tab-content">
             <div class="table-wrapper">
@@ -1311,12 +1333,45 @@
           { level: 53, cost: "685万", exp: "500000", crop: "棉花", mutation: "-", stall: "上限25->26", field: "-", func: "-", furniture: "艺术角镂空瓶" },
 
           { level: 54, cost: "734万", exp: "520000", crop: "橘子", mutation: "-", stall: "-", field: "2级农田数量5->6", func: "-", furniture: "-" },
-          { level: 55, cost: "-", exp: "-", crop: "菠萝", mutation: "-", stall: "-", field: "-", func: "-", furniture: "-" },
-         
-
-
-
+          { level: 55, cost: "-", exp: "-", crop: "菠萝", mutation: "-", stall: "-", field: "-", func: "-", furniture: "-" },  
         ];
+      
+
+      const upgradeData = [
+          { name: "🌾 小麦", base: "1", l2: "10", l3: "-", l4: "-", l5: "-", l6: "-", l7: "-", l8: "-", l9: "-", l10: "-" },
+          { name: "🥕 胡萝卜", base: "3", l2: "10", l3: "20", l4: "-", l5: "-", l6: "-", l7: "-", l8: "-", l9: "-", l10: "-" },
+          { name: "🍅 番茄", base: "4", l2: "10", l3: "30", l4: "-", l5: "-", l6: "-", l7: "-", l8: "-", l9: "-", l10: "-" },
+          { name: "🍄 蘑菇", base: "8", l2: "10", l3: "10", l4: "20", l5: "20", l6: "20", l7: "-", l8: "-", l9: "-", l10: "-" },
+          { name: "🥔 土豆", base: "10", l2: "10", l3: "10", l4: "20", l5: "30", l6: "30", l7: "-", l8: "-", l9: "-", l10: "-" },
+          { name: "🌽 玉米", base: "7", l2: "10", l3: "10", l4: "10", l5: "20", l6: "20", l7: "-", l8: "-", l9: "-", l10: "-" },
+          { name: "🍓 草莓", base: "8", l2: "10", l3: "10", l4: "20", l5: "20", l6: "20", l7: "-", l8: "-", l9: "-", l10: "-" },
+          { name: "🌻 向日葵", base: "18", l2: "10", l3: "10", l4: "10", l5: "20", l6: "20", l7: "20", l8: "30", l9: "30", l10: "30" },
+          { name: "🫑 青椒", base: "16", l2: "10", l3: "10", l4: "10", l5: "10", l6: "20", l7: "20", l8: "20", l9: "30", l10: "30" },
+          { name: "🧄 大蒜", base: "15", l2: "10", l3: "10", l4: "10", l5: "10", l6: "20", l7: "20", l8: "20", l9: "20", l10: "30" },
+          { name: "🍌 香蕉", base: "15", l2: "10", l3: "10", l4: "10", l5: "10", l6: "20", l7: "20", l8: "20", l9: "20", l10: "30" },
+          { name: "🫐 蓝莓", base: "13", l2: "10", l3: "10", l4: "10", l5: "10", l6: "10", l7: "20", l8: "20", l9: "20", l10: "20" },
+          { name: "🥒 黄瓜", base: "180", l2: "40", l3: "80", l4: "120", l5: "160", l6: "200", l7: "240", l8: "280", l9: "320", l10: "360" },
+          { name: "🍆 茄子", base: "78", l2: "20", l3: "40", l4: "60", l5: "80", l6: "100", l7: "100", l8: "120", l9: "120", l10: "140" },
+          { name: "🎃 南瓜", base: "52", l2: "20", l3: "30", l4: "40", l5: "50", l6: "60", l7: "60", l8: "80", l9: "80", l10: "100" },
+          { name: "🍊 柚子", base: "52", l2: "20", l3: "30", l4: "40", l5: "50", l6: "60", l7: "60", l8: "80", l9: "80", l10: "100" },
+          { name: "🥬 卷心菜", base: "36", l2: "20", l3: "20", l4: "30", l5: "30", l6: "40", l7: "40", l8: "50", l9: "60", l10: "70" },
+          { name: "🌱 白萝卜", base: "900", l2: "200", l3: "400", l4: "600", l5: "800", l6: "1000", l7: "1200", l8: "1400", l9: "1600", l10: "1800" },
+          { name: "🍇 葡萄", base: "360", l2: "80", l3: "160", l4: "240", l5: "320", l6: "400", l7: "480", l8: "560", l9: "640", l10: "720" },
+          { name: "🥗 生菜", base: "225", l2: "50", l3: "100", l4: "150", l5: "200", l6: "250", l7: "300", l8: "350", l9: "400", l10: "450" },
+          { name: "🍉 西瓜", base: "225", l2: "50", l3: "100", l4: "150", l5: "200", l6: "250", l7: "300", l8: "350", l9: "400", l10: "450" },
+          { name: "🌶️ 辣椒", base: "108", l2: "40", l3: "60", l4: "80", l5: "100", l6: "120", l7: "140", l8: "160", l9: "180", l10: "200" },
+          { name: "🧅 洋葱", base: "-", l2: "-", l3: "-", l4: "-", l5: "-", l6: "-", l7: "-", l8: "-", l9: "-", l10: "-" },
+          { name: "🥦 花菜", base: "-", l2: "-", l3: "-", l4: "-", l5: "-", l6: "-", l7: "-", l8: "-", l9: "-", l10: "-" },
+          { name: "🥜 花生", base: "-", l2: "-", l3: "-", l4: "-", l5: "-", l6: "-", l7: "-", l8: "-", l9: "-", l10: "-" },
+          { name: "🍈 木瓜", base: "-", l2: "-", l3: "-", l4: "-", l5: "-", l6: "-", l7: "-", l8: "-", l9: "-", l10: "-" },
+          { name: "🌾 荞麦", base: "-", l2: "-", l3: "-", l4: "-", l5: "-", l6: "-", l7: "-", l8: "-", l9: "-", l10: "-" },
+          { name: "🥬 莴笋", base: "-", l2: "-", l3: "-", l4: "-", l5: "-", l6: "-", l7: "-", l8: "-", l9: "-", l10: "-" },
+          { name: "🍒 红枣", base: "-", l2: "-", l3: "-", l4: "-", l5: "-", l6: "-", l7: "-", l8: "-", l9: "-", l10: "-" },
+          { name: "☁️ 棉花", base: "-", l2: "-", l3: "-", l4: "-", l5: "-", l6: "-", l7: "-", l8: "-", l9: "-", l10: "-" },
+          { name: "🍍 菠萝", base: "-", l2: "-", l3: "-", l4: "-", l5: "-", l6: "-", l7: "-", l8: "-", l9: "-", l10: "-" },
+        ];
+
+
 
       // 3. 小摊升级表 (原表)
       const stallData = [
@@ -1374,6 +1429,9 @@
           { level: 23, cost: "648万", exp: "89000" },
           { level: 24, cost: "766万", exp: "100000" }
       ];
+
+
+
 
       // ================= 渲染与排序逻辑 =================
       let currentSort = { key: "level", asc: true };
@@ -1465,6 +1523,18 @@
                 <td>第 ${row.level} 块</td>
                 <td style="color:var(--danger); font-weight:bold;">${row.cost}</td>
                 <td style="color:var(--primary);">${row.exp}</td>
+            </tr>`;
+        });
+
+        // 👇 新增：渲染升级表 👇
+        const upgradeBody = document.getElementById("upgradeTableBody");
+        upgradeData.forEach(row => {
+            upgradeBody.innerHTML += `<tr class="row-hover">
+                <td style="position: sticky; left: 0; background: #fff; z-index: 1; font-weight:bold; border-right: 1px solid var(--border);">${row.name}</td>
+                <td style="color:var(--danger); font-weight:bold;">${row.base}</td>
+                <td>${row.l2}</td><td>${row.l3}</td><td>${row.l4}</td>
+                <td>${row.l5}</td><td>${row.l6}</td><td>${row.l7}</td>
+                <td>${row.l8}</td><td>${row.l9}</td><td>${row.l10}</td>
             </tr>`;
         });
 
