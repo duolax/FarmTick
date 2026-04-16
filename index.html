@@ -5,10 +5,12 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover" />
   <meta name="referrer" content="no-referrer-when-downgrade" />
   <title>王者农场专业务农 | 极限收割计划</title>
-  <style>
+<style>
+    /* ================= 1. 全局变量与基础 ================= */
     :root {
       --primary: #2e7d32;
       --primary-light: #e8f5e9;
@@ -43,7 +45,7 @@
       font-size: 28px;
     }
 
-    /* ================= 卡片与折叠系统 ================= */
+    /* ================= 2. 卡片与折叠系统 ================= */
     .card {
       background: var(--card-bg);
       border-radius: 12px;
@@ -83,8 +85,9 @@
       display: none !important;
     }
 
+    /* 折叠时，三角形转为向上 */
     .card-collapsed .toggle-icon {
-      transform: rotate(-90deg);
+      transform: rotate(180deg); 
     }
 
     .card-collapsed .card-header-flex {
@@ -93,33 +96,15 @@
       padding: 0;
     }
 
-    /* ================= 表单与输入框 (Safari 完美兼容) ================= */
-    .form-group {
-      margin-bottom: 16px;
-    }
+    /* ================= 3. 表单与输入框 ================= */
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-weight: bold; margin-bottom: 8px; color: var(--text-main); }
+    .input-row { display: flex; gap: 12px; align-items: center; }
+    .input-addon { color: var(--text-muted); font-weight: bold; }
 
-    .form-group label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 8px;
-      color: var(--text-main);
-    }
-
-    .input-row {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .input-addon {
-      color: var(--text-muted);
-      font-weight: bold;
-    }
-
-    /* 强制所有表单元素同高同框，剥离苹果默认样式 */
+    /* 常规输入框剥离苹果默认样式，保持 40px 等高 */
     select,
     input[type="number"],
-    input[type="datetime-local"],
     input[type="text"] {
       height: 40px !important;
       padding: 0 10px !important;
@@ -134,301 +119,105 @@
       color: var(--text-main);
     }
 
-    .input-row input {
-      flex: 1;
+    /* 种下时间专属：保留苹果原生唤醒能力，不加 -webkit-appearance:none */
+    input[type="datetime-local"] {
+      height: 40px !important;
+      padding: 0 10px !important;
+      border: 1px solid var(--border);
+      border-radius: 8px !important;
+      font-size: 14px;
+      width: 100%;
+      box-sizing: border-box;
+      background-color: #fff;
+      font-family: inherit;
+      color: var(--text-main);
     }
+    
+    .input-row input { flex: 1; }
 
-    /* ================= 按钮系统 ================= */
-    .btn-group {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
+    /* ================= 4. 按钮系统 ================= */
+    .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
 
     .time-btn {
-      flex: 1;
-      min-width: 60px;
-      padding: 10px 0;
-      border: 1px solid var(--primary);
-      background: transparent;
-      color: var(--primary);
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: bold;
-      transition: all 0.2s;
+      flex: 1; min-width: 60px; padding: 10px 0;
+      border: 1px solid var(--primary); background: transparent;
+      color: var(--primary); border-radius: 6px; cursor: pointer;
+      font-size: 14px; font-weight: bold; transition: all 0.2s;
     }
+    .time-btn.active { background: var(--primary); color: white; }
 
-    .time-btn.active {
-      background: var(--primary);
-      color: white;
+    /* 同步、保存、Now 等主要操作按钮 */
+    .sync-btn, .now-btn {
+      height: 40px !important; padding: 0 15px !important; margin: 0;
+      background: var(--primary) !important; color: #fff !important;
+      font-weight: bold; cursor: pointer; border: none !important;
+      border-radius: 8px !important; white-space: nowrap;
+      display: inline-flex; align-items: center; justify-content: center;
+      box-sizing: border-box; transition: all 0.2s;
     }
+    .sync-btn:active, .now-btn:active { transform: scale(0.95); opacity: 0.9; }
 
-    /* 1. 主要操作按钮（同步、Now、保存等大按钮） */
-    .sync-btn,
-    .now-btn {
-      height: 40px !important;
-      padding: 0 15px !important;
-      margin: 0;
-      background: var(--primary) !important;
-      color: #fff !important;
-      font-weight: bold;
-      cursor: pointer;
-      border: none !important;
-      border-radius: 8px !important;
-      white-space: nowrap;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      box-sizing: border-box;
-      transition: all 0.2s;
-    }
-
-    .sync-btn:active,
-    .now-btn:active {
-      transform: scale(0.95);
-      opacity: 0.9;
-    }
-
-    /* 2. 恢复【设日历按钮】的温柔小巧风格 */
+    /* 温柔的日历小按钮 */
     .alarm-btn {
-      margin-top: 8px !important;
-      padding: 6px 0 !important;
-      font-size: 11px !important;
-      font-weight: bold;
-      color: var(--primary) !important;
-      background: var(--primary-light) !important;
-      border: none !important;
-      border-radius: 6px !important;
-      cursor: pointer;
-      transition: 0.2s;
-      width: 100% !important;
-      height: auto !important;
-      /* 解除大按钮的高度限制 */
-      letter-spacing: -0.5px;
-      display: block !important;
+      margin-top: 8px !important; padding: 6px 0 !important;
+      font-size: 11px !important; font-weight: bold;
+      color: var(--primary) !important; background: var(--primary-light) !important;
+      border: none !important; border-radius: 6px !important;
+      cursor: pointer; transition: 0.2s; width: 100% !important;
+      height: auto !important; letter-spacing: -0.5px; display: block !important;
     }
+    .alarm-btn:hover { background: #c8e6c9 !important; }
+    .alarm-btn-danger { color: var(--danger) !important; background: #ffebee !important; }
+    .alarm-btn-danger:hover { background: #ffcdd2 !important; }
 
-    .alarm-btn:hover {
-      background: #c8e6c9 !important;
-    }
+    /* ================= 5. 数据中心表格与排期器 ================= */
+    #resultPanel { display: none; padding: 20px; border-radius: 8px; margin-top: 20px; font-size: 16px; }
+    .alert-danger { background-color: #ffebee; color: var(--danger); border: 1px solid #ffcdd2; }
+    .alert-warning { background-color: #fff3e0; color: var(--warning); border: 1px solid #ffe0b2; }
+    .alert-success { background-color: var(--primary-light); color: var(--primary); border: 1px solid #c8e6c9; }
+    .alarm-time { font-size: 28px; font-weight: bold; display: block; margin: 12px 0; }
 
-    .alarm-btn-danger {
-      color: var(--danger) !important;
-      background: #ffebee !important;
-    }
+    .timeline-container { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+    .timeline-container::-webkit-scrollbar { display: none; }
+    .timeline-card { flex: 1; min-width: 0; background: #fafafa; border-radius: 8px; padding: 10px 4px; text-align: center; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04); }
 
-    .alarm-btn-danger:hover {
-      background: #ffcdd2 !important;
-    }
+    .table-wrapper { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background-color: var(--primary-light); color: var(--primary); font-weight: bold; cursor: pointer; user-select: none; }
+    th:hover { background-color: #c8e6c9; }
+    .row-hover:hover { background-color: #f9f9f9; }
+    .highlight-data { font-weight: bold; color: var(--danger); }
+    .pmo-warning { color: #999; }
+    .pmo-star { font-weight: bold; color: var(--primary); background-color: #fff8e1; }
+    .pmo-crown { font-weight: bold; color: #d84315; background-color: #ffcc80; }
 
-    /* ================= 结果面板与排期 ================= */
-    #resultPanel {
-      display: none;
-      padding: 20px;
-      border-radius: 8px;
-      margin-top: 20px;
-      font-size: 16px;
-    }
+    .tabs { display: flex; border-bottom: 2px solid var(--border); margin-bottom: 15px; overflow-x: auto; scrollbar-width: none; white-space: nowrap; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab-btn { padding: 10px 16px; font-size: 14px; font-weight: bold; color: var(--text-muted); background: none; border: none; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; }
+    .tab-btn:hover { color: var(--primary); }
+    .tab-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
+    .tab-content { display: none; animation: fadeIn 0.3s ease; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-    .alert-danger {
-      background-color: #ffebee;
-      color: var(--danger);
-      border: 1px solid #ffcdd2;
-    }
-
-    .alert-warning {
-      background-color: #fff3e0;
-      color: var(--warning);
-      border: 1px solid #ffe0b2;
-    }
-
-    .alert-success {
-      background-color: var(--primary-light);
-      color: var(--primary);
-      border: 1px solid #c8e6c9;
-    }
-
-    .alarm-time {
-      font-size: 28px;
-      font-weight: bold;
-      display: block;
-      margin: 12px 0;
-    }
-
-    .timeline-container {
-      display: flex;
-      gap: 6px;
-      overflow-x: auto;
-      padding-bottom: 5px;
-      scrollbar-width: none;
-    }
-
-    .timeline-container::-webkit-scrollbar {
-      display: none;
-    }
-
-    .timeline-card {
-      flex: 1;
-      min-width: 0;
-      background: #fafafa;
-      border-radius: 8px;
-      padding: 10px 4px;
-      text-align: center;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-    }
-
-    /* ================= 静态数据表 ================= */
-    .table-wrapper {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-      min-width: 600px;
-    }
-
-    th,
-    td {
-      padding: 12px;
-      text-align: left;
-      border-bottom: 1px solid var(--border);
-    }
-
-    th {
-      background-color: var(--primary-light);
-      color: var(--primary);
-      font-weight: bold;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    th:hover {
-      background-color: #c8e6c9;
-    }
-
-    .row-hover:hover {
-      background-color: #f9f9f9;
-    }
-
-    .highlight-data {
-      font-weight: bold;
-      color: var(--danger);
-    }
-
-    .pmo-warning {
-      color: #999;
-    }
-
-    .pmo-star {
-      font-weight: bold;
-      color: var(--primary);
-      background-color: #fff8e1;
-    }
-
-    .pmo-crown {
-      font-weight: bold;
-      color: #d84315;
-      background-color: #ffcc80;
-    }
-
-    /* ================= 数据中心 Tab ================= */
-    .tabs {
-      display: flex;
-      border-bottom: 2px solid var(--border);
-      margin-bottom: 15px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      white-space: nowrap;
-    }
-
-    .tabs::-webkit-scrollbar {
-      display: none;
-    }
-
-    .tab-btn {
-      padding: 10px 16px;
-      font-size: 14px;
-      font-weight: bold;
-      color: var(--text-muted);
-      background: none;
-      border: none;
-      cursor: pointer;
-      border-bottom: 3px solid transparent;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-
-    .tab-btn:hover {
-      color: var(--primary);
-    }
-
-    .tab-btn.active {
-      color: var(--primary);
-      border-bottom: 3px solid var(--primary);
-    }
-
-    .tab-content {
-      display: none;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(5px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* ================= 账号管家 - 极致紧凑兼容 ================= */
-    .account-manager-card {
-      padding: 16px 10px !important;
-    }
-
+    /* ================= 6. 账号管家 - 极致紧凑兼容 ================= */
+    .account-manager-card { padding: 16px 10px !important; }
+    
     .ios-btn {
-      height: 28px;
-      padding: 0 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      height: 28px; padding: 0 10px; border-radius: 6px;
+      font-size: 12px; font-weight: bold; border: none; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
     }
+    .btn-reset { background: #fff; color: #d32f2f; border: 1px solid #ff4d4f; }
+    .btn-add { background: #2e7d32; color: #fff; }
 
-    .btn-reset {
-      background: #fff;
-      color: #d32f2f;
-      border: 1px solid #ff4d4f;
-    }
+    .account-table { width: 100% !important; min-width: 100% !important; }
 
-    .btn-add {
-      background: #2e7d32;
-      color: #fff;
-    }
-
-    .account-table {
-      width: 100% !important;
-      min-width: 100% !important;
-    }
-
-    /* 11列黄金比例，绝不缩放，防 Safari 撑破 */
+    /* 11列黄金比例，分配更均匀 */
     .acc-tr {
       display: grid !important;
-      grid-template-columns: 8% 15% 8% 8% 12% 10% 10% 10% 7% 5% 7% !important;
+      grid-template-columns: 8% 15% 8% 8% 12% 10% 10% 10% 6.5% 6% 6.5% !important;
       align-items: center;
       border-bottom: 1px solid #f2f2f2;
       min-height: 40px;
@@ -436,173 +225,112 @@
 
     .acc-td {
       padding: 4px 1px !important;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-      box-sizing: border-box;
-      overflow: hidden;
+      display: flex; justify-content: center; align-items: center;
+      width: 100%; box-sizing: border-box; overflow: hidden;
     }
-
+    
+    /* 基础内部输入框 */
     .acc-td input {
-      width: 100%;
-      height: 100%;
-      border: none;
-      background: transparent;
-      text-align: center;
-      font-size: 11px !important;
-      padding: 0 !important;
-      color: #333;
-      outline: none;
-      -webkit-appearance: none;
+      width: 100%; height: 100%; border: none; background: transparent;
+      text-align: center; font-size: 11px !important; padding: 0 !important;
+      color: #333; outline: none; -webkit-appearance: none; box-sizing: border-box;
     }
 
-    .name-completed {
-      background-color: #e5e5ea !important;
-    }
+    /* 状态满格变色（名字变灰 / 作物变黄） */
+    .name-completed .name-td { background-color: #e5e5ea !important; }
+    .has-fruit { background-color: #fffac0 !important; }
 
-    .name-completed input {
-      color: #aeaeb2 !important;
-      text-decoration: line-through;
-    }
-
+    /* 任务复选框 */
     .custom-cb {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      border: 1px solid #c7c7cc;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      transition: 0.2s;
+      width: 16px; height: 16px; border-radius: 50%; border: 1px solid #c7c7cc;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 10px; transition: 0.2s;
+    }
+    .custom-cb.checked { background: #07c160; border-color: #07c160; color: #fff; }
+
+    /* ================= 7. 完美的统一正方形操作按钮 ================= */
+    .icon-btn {
+      background: #f4f5f9; border: none; border-radius: 6px;
+      width: 28px !important; height: 28px !important; 
+      cursor: pointer; font-size: 14px;
+      display: flex; justify-content: center; align-items: center;
+      padding: 0; color: #666; transition: 0.2s;
+    }
+    .icon-btn:active { background: #e0e0e0; transform: scale(0.95); }
+    .icon-btn-danger { color: #ff4d4f; background: #fff1f0; }
+    .icon-btn-danger:active { background: #ffcdd2; }
+
+    .sort-btn-group {
+      display: flex; flex-direction: column; width: 28px; height: 28px;
+      border-radius: 6px; overflow: hidden; background: #f4f5f9;
+    }
+    .sort-btn {
+      flex: 1; border: none; background: transparent; color: #666;
+      font-size: 10px; cursor: pointer; display: flex;
+      justify-content: center; align-items: center; padding: 0;
+    }
+    .sort-btn:active { background: #dcdcdc; }
+    .sort-btn:first-child { border-bottom: 1px solid #fff; }
+
+    /* ================= 8. 终极时间选择器：透明层+悬浮叉号 ================= */
+    .time-display {
+      width: 100%; text-align: center; font-size: 13px; font-weight: bold;
+      color: #07c160; pointer-events: none; /* 让点击穿透 */
+    }
+    .time-display.danger {
+      color: #ff4d4f; background: rgba(255, 77, 79, 0.1);
+      border-radius: 4px; padding: 2px 4px; animation: dangerPulse 2s infinite;
+    }
+    @keyframes dangerPulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+
+    /* 透明的原生输入框铺满全格 */
+    input[type="time"].acc-time-overlay {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      opacity: 0; cursor: pointer; z-index: 5; margin: 0; padding: 0; border: none;
     }
 
-    .custom-cb.checked {
-      background: #07c160;
-      border-color: #07c160;
-      color: #fff;
+    /* 悬浮清空小叉号 */
+    .clear-badge {
+      position: absolute; top: 2px; right: 2px; width: 14px; height: 14px;
+      background-color: rgba(0, 0, 0, 0.15); color: #fff; border-radius: 50%;
+      font-size: 10px; line-height: 14px; text-align: center;
+      cursor: pointer; z-index: 10; font-weight: bold;
     }
+    .clear-badge:active { background-color: #ff4d4f; }
 
-    /* 原生时间选框防 Safari 偏移 */
-    input[type="time"].acc-time-input {
-      background: transparent !important;
-      border: none !important;
-      font-size: 12px !important;
-      color: #07c160;
-      font-weight: bold;
-      text-align: center;
-      padding: 0 !important;
-      margin: 0;
-      cursor: text;
-      outline: none;
-      -webkit-appearance: none;
-      /* 去除苹果默认外观 */
-      letter-spacing: -0.5px;
-    }
-
-    input[type="time"].acc-time-input::-webkit-calendar-picker-indicator {
-      display: none;
-    }
-
-    input[type="time"].acc-time-input.danger {
-      color: #ff4d4f !important;
-      background: rgba(255, 77, 79, 0.1) !important;
-      border-radius: 4px;
-      animation: dangerPulse 2s infinite;
-    }
-
-    @keyframes dangerPulse {
-      0% {
-        opacity: 1;
-      }
-
-      50% {
-        opacity: 0.6;
-      }
-
-      100% {
-        opacity: 1;
-      }
-    }
-
-    .small-btn {
-      background: #f4f5f9;
-      border: none;
-      border-radius: 4px;
-      width: 100%;
-      height: 24px;
-      cursor: pointer;
-      font-size: 12px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 0;
-    }
-
-    .btn-del-acc {
-      background: #fff1f0;
-      color: #ff4d4f;
-    }
-
-    /* ================= 手机端精准缩放适配 ================= */
+    /* ================= 9. 手机端精准缩放适配 ================= */
     @media screen and (max-width: 768px) {
-      body {
-        padding: 8px;
-      }
-
-      .card {
-        padding: 16px;
-        margin-bottom: 16px;
-      }
-
-      h1 {
-        font-size: 22px;
-        margin-bottom: 20px;
-      }
-
-      .card-title,
-      .card-header-flex .card-title {
-        font-size: 16px;
-      }
-
-      .time-btn {
-        font-size: 13px;
-        padding: 8px 0;
-      }
-
-      table {
-        font-size: 12px;
-      }
-
-      th,
-      td {
-        padding: 8px 6px;
-      }
-
-      .card>div[style*="font-size: 48px"] {
-        font-size: 36px !important;
-        padding: 8px !important;
-      }
-
-      .card>div>h3 {
-        font-size: 18px !important;
-      }
+      body { padding: 8px; }
+      .card { padding: 16px; margin-bottom: 16px; }
+      h1 { font-size: 22px; margin-bottom: 20px; }
+      .card-title, .card-header-flex .card-title { font-size: 16px; }
+      .time-btn { font-size: 13px; padding: 8px 0; }
+      table { font-size: 12px; }
+      th, td { padding: 8px 6px; }
+      .card>div[style*="font-size: 48px"] { font-size: 36px !important; padding: 8px !important; }
+      .card>div>h3 { font-size: 18px !important; }
 
       /* 针对超小屏幕的管家微调 */
-      .acc-td input {
-        font-size: 10px !important;
-      }
+      .acc-td input { font-size: 10px !important; }
+      .time-display { font-size: 11px !important; }
+      
+      /* 手机上按钮等比缩小为 24x24px */
+      .icon-btn, .sort-btn-group { width: 24px !important; height: 24px !important; }
+      .icon-btn { font-size: 12px; }
+    }
 
-      input[type="time"].acc-time-input {
-        font-size: 11px !important;
-      }
 
-      .small-btn {
-        height: 20px;
-        font-size: 10px;
-      }
+
+    /* ================= 神仙思路：全透明清空覆盖层 ================= */
+    .invisible-clear-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10; /* 层级最高，盖住下面的原生时间输入框 */
+      cursor: pointer;
+      /* background-color: rgba(255, 0, 0, 0.2); 测试时可以把这行取消注释，看看它是不是盖住了全格 */
     }
   </style>
 </head>
@@ -702,22 +430,22 @@
 
 
           <div id="saveHarvestContainer" style="display: none; margin-top: 15px;">
-          
-          <div style="display: flex; gap: 8px; margin-bottom: 10px; align-items: center;">
-            <input type="text" id="harvestRecordName" placeholder="给记录取个名字（如XXX-菠萝）"
-              style="flex: 1; padding: 0 10px; height: 40px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; box-sizing: border-box;" />
-            <button class="sync-btn" onclick="saveHarvestRecord()">保存</button>
-          </div>
 
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <select class="acc-sync-select" id="calcSyncSelect" 
-              style="flex: 1; padding: 0 10px; height: 40px; border-radius: 8px; font-size: 14px; box-sizing: border-box; border: 1px solid var(--border);">
-              <option value="">同步计算结果到账号...</option>
-            </select>
-            <button class="sync-btn" onclick="syncCalcToAccount()">同步</button>
+            <div style="display: flex; gap: 8px; margin-bottom: 10px; align-items: center;">
+              <input type="text" id="harvestRecordName" placeholder="给记录取个名字（如XXX-菠萝）"
+                style="flex: 1; padding: 0 10px; height: 40px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; box-sizing: border-box;" />
+              <button class="sync-btn" onclick="saveHarvestRecord()">保存</button>
+            </div>
+
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <select class="acc-sync-select" id="calcSyncSelect"
+                style="flex: 1; padding: 0 10px; height: 40px; border-radius: 8px; font-size: 14px; box-sizing: border-box; border: 1px solid var(--border);">
+                <option value="">同步计算结果到账号...</option>
+              </select>
+              <button class="sync-btn" onclick="syncCalcToAccount()">同步</button>
+            </div>
+
           </div>
-          
-        </div>
 
 
 
@@ -791,7 +519,7 @@
               刷新当前时间
             </button>
 
-            
+
           </div>
         </div>
 
@@ -1226,18 +954,18 @@
     </div>
   </div>
 
-    <div id="app_download_card" class="card"
-      style="display: none; margin-top: 10px; padding: 20px; background: linear-gradient(135deg, #e8f5e9 0%, #f4f7f6 100%); text-align: center; border: 1px solid #c8e6c9;">
+  <div id="app_download_card" class="card"
+    style="display: none; margin-top: 10px; padding: 20px; background: linear-gradient(135deg, #e8f5e9 0%, #f4f7f6 100%); text-align: center; border: 1px solid #c8e6c9;">
 
-      <h3 style="margin: 0 0 10px 0; color: var(--primary); font-size: 18px">
-        🤖 安卓可通过app，离线使用获取最佳体验
-      </h3>
+    <h3 style="margin: 0 0 10px 0; color: var(--primary); font-size: 18px">
+      🤖 安卓可通过app，离线使用获取最佳体验
+    </h3>
 
-      <a href="https://github.com/gzchenjin2/hokfarming/releases/download/2.0/hokfarming.v2.0.apk" target="_blank"
-        style="display: inline-block; background: var(--primary); color: white; text-decoration: none; padding: 10px 28px; border-radius: 25px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 12px rgba(46, 125, 50, 0.2);">
-        ⬇️ 下载 Android 版 (APK)
-      </a>
-    </div>
+    <a href="https://github.com/gzchenjin2/hokfarming/releases/download/2.0/hokfarming.v2.0.apk" target="_blank"
+      style="display: inline-block; background: var(--primary); color: white; text-decoration: none; padding: 10px 28px; border-radius: 25px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 12px rgba(46, 125, 50, 0.2);">
+      ⬇️ 下载 Android 版 (APK)
+    </a>
+  </div>
 
 
 
@@ -2243,23 +1971,91 @@
       return diff >= -60 && diff <= 30;
     }
 
+
+
+    // ================= 终极长按引擎 (太极打法，绝不激怒 iOS Safari) =================
+    window.lpTimer = null;
+    window.lpFired = false; // 记录是否已经触发了长按
+
+    // 1. 手指按下：只负责倒计时，绝对不拦截任何系统事件
+    function startTouch(e, index, field) {
+      window.lpFired = false; 
+      
+      window.lpTimer = setTimeout(() => {
+        window.lpFired = true; // 倒计时结束，标记长按生效
+        
+        // 执行清空逻辑
+        if (field === 'blessing') {
+          window.accounts[index].blessing = 0;
+        } else {
+          window.accounts[index][field] = '';
+          window.accounts[index][field + '_ts'] = null;
+        }
+        
+        saveAccs();
+        
+        // 局部更新 DOM 样式
+        const row = document.getElementById('accountListBody').children[index];
+        if (row) {
+          const isDone = window.accounts[index].taskDone && (parseInt(window.accounts[index].blessing) === 0);
+          if (isDone) row.classList.add('name-completed');
+          else row.classList.remove('name-completed');
+        }
+        
+        if (field === 'name') updateSyncDropdowns();
+        renderAccountManager();
+
+        if (navigator.vibrate) navigator.vibrate(50); // 震动反馈
+      }, 600);
+    }
+
+    // 2. 手指松开/滑动：取消倒计时
+    function cancelTouch() {
+      if (window.lpTimer) {
+        clearTimeout(window.lpTimer);
+        window.lpTimer = null;
+      }
+    }
+
+    // 3. 🌟 核心拦截：只在 click 事件触发时做判断
+    function preventClickIfLongPress(e) {
+      // 如果刚才触发了长按，就强行没收这次点击，不让它弹出轮盘或键盘！
+      if (window.lpFired) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false; 
+      }
+      // 如果没触发长按（短按），这里什么都不做，系统原生轮盘 100% 完美弹出！
+    }
+
+
+
+    // 专门用于静默刷新同步下拉框，不打断任何表格输入
+    function updateSyncDropdowns() {
+      const selects = document.querySelectorAll('.acc-sync-select');
+      const optionsHtml = '<option value="">选择账号进行同步...</option>' +
+        window.accounts.map(a => `<option value="${a.id}">${a.name || '未命名'}</option>`).join('');
+
+      selects.forEach(s => {
+        const oldVal = s.value;
+        s.innerHTML = optionsHtml;
+        s.value = oldVal; // 保持原本选中的状态不变
+      });
+    }
+
+
+
+
     // 3. 渲染管家表格
     function renderAccountManager() {
       const listBody = document.getElementById('accountListBody');
-      const selects = document.querySelectorAll('.acc-sync-select');
       if (!listBody) return;
 
       document.getElementById('accountCount').innerText = `${window.accounts.length} Accounts`;
       listBody.innerHTML = '';
 
-      // 更新同步下拉框
-      const optionsHtml = '<option value="">选择账号进行同步...</option>' +
-        window.accounts.map(a => `<option value="${a.id}">${a.name || '未命名'}</option>`).join('');
-      selects.forEach(s => {
-        const oldVal = s.value;
-        s.innerHTML = optionsHtml;
-        s.value = oldVal;
-      });
+      // 🌟 核心修改：直接调用抽离出来的函数，代码更干净
+      updateSyncDropdowns();
 
       window.accounts.forEach((acc, index) => {
         const isDone = acc.taskDone && (parseInt(acc.blessing) === 0);
@@ -2267,21 +2063,52 @@
         row.className = `acc-tr ${isDone ? 'name-completed' : ''}`;
         row.innerHTML = `
       <div class="acc-td"><input value="${acc.area || ''}" oninput="updateAccField(${index}, 'area', this.value)" placeholder="-"></div>
-      <div class="acc-td"><input value="${acc.name || ''}" oninput="updateAccField(${index}, 'name', this.value)" placeholder="未命名"></div>
-      <div class="acc-td"><input type="number" style="color:#07c160;font-weight:bold" value="${acc.blessing}" oninput="updateAccField(${index}, 'blessing', this.value)" oncontextmenu="resetBlessing(${index});return false;"></div>
-      <div class="acc-td"><div class="custom-cb ${acc.taskDone ? 'checked' : ''}" onclick="toggleAccTask(${index})">✓</div></div>
-      <div class="acc-td"><input value="${acc.fruit || ''}" oninput="updateAccField(${index}, 'fruit', this.value)" placeholder="作物"></div>
+      <div class="acc-td name-td"><input class="name-input" value="${acc.name || ''}" oninput="updateAccField(${index}, 'name', this.value)" placeholder="未命名"></div>
+
+
 
       <div class="acc-td">
-        <input type="time" class="acc-time-input ${isTimeDanger(acc.water1, acc.water1_ts) ? 'danger' : ''}" value="${acc.water1 || ''}" onchange="updateAccField(${index},'water1',this.value)" oncontextmenu="clearAccTime(${index},'water1');return false;">
-      </div>
-      <div class="acc-td">
-        <input type="time" class="acc-time-input ${isTimeDanger(acc.water2, acc.water2_ts) ? 'danger' : ''}" value="${acc.water2 || ''}" onchange="updateAccField(${index},'water2',this.value)" oncontextmenu="clearAccTime(${index},'water2');return false;">
-      </div>
-      <div class="acc-td">
-        <input type="time" class="acc-time-input ${isTimeDanger(acc.harvest, acc.harvest_ts) ? 'danger' : ''}" value="${acc.harvest || ''}" onchange="updateAccField(${index},'harvest',this.value)" oncontextmenu="clearAccTime(${index},'harvest');return false;">
+        <input type="number" style="color:#07c160;font-weight:bold" value="${acc.blessing}" 
+          oninput="updateAccField(${index}, 'blessing', this.value)" 
+          ontouchstart="startTouch(event, ${index}, 'blessing')" 
+          ontouchmove="cancelTouch()" 
+          ontouchend="cancelTouch()" 
+          onmousedown="startTouch(event, ${index}, 'blessing')" 
+          onmouseup="cancelTouch()" 
+          onmouseleave="cancelTouch()" 
+          onclick="return preventClickIfLongPress(event)" 
+          oncontextmenu="return false;">
       </div>
       
+      <div class="acc-td"><div class="custom-cb ${acc.taskDone ? 'checked' : ''}" onclick="toggleAccTask(${index})">✓</div></div>
+      <div class="acc-td fruit-td ${acc.fruit ? 'has-fruit' : ''}">
+        <input value="${acc.fruit || ''}" oninput="updateAccField(${index}, 'fruit', this.value)" placeholder="作物">
+      </div>
+
+      <div class="acc-td" style="position: relative; width: 100%; height: 100%;">
+        <div class="time-display ${isTimeDanger(acc.water1, acc.water1_ts) ? 'danger' : ''}">${acc.water1 || '--:--'}</div>
+        <input type="time" class="acc-time-overlay" value="${acc.water1 || ''}" oninput="updateAccField(${index}, 'water1', this.value, this)">
+        
+        ${acc.water1 ? `<div class="invisible-clear-layer" onclick="updateAccField(${index}, 'water1', ''); event.stopPropagation();"></div>` : ''}
+      </div>
+
+      <div class="acc-td" style="position: relative; width: 100%; height: 100%;">
+        <div class="time-display ${isTimeDanger(acc.water2, acc.water2_ts) ? 'danger' : ''}">${acc.water2 || '--:--'}</div>
+        <input type="time" class="acc-time-overlay" value="${acc.water2 || ''}" oninput="updateAccField(${index}, 'water2', this.value, this)">
+        
+        ${acc.water2 ? `<div class="invisible-clear-layer" onclick="updateAccField(${index}, 'water2', ''); event.stopPropagation();"></div>` : ''}
+      </div>
+
+      <div class="acc-td" style="position: relative; width: 100%; height: 100%;">
+        <div class="time-display ${isTimeDanger(acc.harvest, acc.harvest_ts) ? 'danger' : ''}">${acc.harvest || '--:--'}</div>
+        <input type="time" class="acc-time-overlay" value="${acc.harvest || ''}" oninput="updateAccField(${index}, 'harvest', this.value, this)">
+        
+        ${acc.harvest ? `<div class="invisible-clear-layer" onclick="updateAccField(${index}, 'harvest', ''); event.stopPropagation();"></div>` : ''}
+      </div>
+      
+
+
+
       <div class="acc-td"><button class="small-btn" onclick="resetAccRow(${index})">↺</button></div>
       <div class="acc-td" style="flex-direction:column;gap:2px"><button class="small-btn" style="height:15px;font-size:8px" onclick="moveAcc(${index},-1)">▲</button><button class="small-btn" style="height:15px;font-size:8px" onclick="moveAcc(${index},1)">▼</button></div>
       <div class="acc-td"><button class="small-btn" style="color:red" onclick="deleteAcc(${index})">✕</button></div>
@@ -2356,14 +2183,118 @@
     // 其他辅助函数
     function addNewAccount() { window.accounts.push({ id: Date.now(), name: '', area: '', blessing: 10, taskDone: false, fruit: '', water1: '', water2: '', harvest: '' }); saveAccs(); renderAccountManager(); }
     function deleteAcc(i) { if (confirm("确定删除？")) { window.accounts.splice(i, 1); saveAccs(); renderAccountManager(); } }
-    function updateAccField(i, f, v) {
+
+
+
+
+    // ================= 专供“祝福”使用的长按引擎 =================
+    window.lpTimer = null;
+    window.lpFired = false; 
+
+    function startTouch(e, index, field) {
+      window.lpFired = false; 
+      window.lpTimer = setTimeout(() => {
+        window.lpFired = true; 
+        
+        if (field === 'blessing') {
+          // 1. 修改底层数据
+          window.accounts[index].blessing = 0;
+          saveAccs();
+          
+          // 2. 🌟 修复关键：把表面输入框的数字也改成 0！
+          if (e && e.target) {
+            e.target.value = 0;
+            e.target.blur(); // 顺便让输入框失去焦点，防止弹键盘
+          }
+          
+          // 3. 局部更新同行样式，保护键盘不掉
+          const row = document.getElementById('accountListBody').children[index];
+          if (row) {
+            const isDone = window.accounts[index].taskDone && (parseInt(window.accounts[index].blessing) === 0);
+            if (isDone) row.classList.add('name-completed');
+            else row.classList.remove('name-completed');
+          }
+          if (navigator.vibrate) navigator.vibrate(50); // 震动反馈
+        }
+      }, 600);
+    }
+
+    function cancelTouch() {
+      if (window.lpTimer) {
+        clearTimeout(window.lpTimer);
+        window.lpTimer = null;
+      }
+    }
+
+    function preventClickIfLongPress(e) {
+      if (window.lpFired) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false; 
+      }
+    }
+
+
+
+
+
+
+
+
+
+
+
+   function updateAccField(i, f, v, el) {
       window.accounts[i][f] = v;
-      // 核心补充：如果用户手动改了时间，必须清空系统时间戳，让它回归 24 小时自动轮转
-      if (f.startsWith('water') || f === 'harvest') window.accounts[i][f + '_ts'] = null;
+      
+      // 1. 如果修改的是时间
+      if (f.startsWith('water') || f === 'harvest') {
+        window.accounts[i][f + '_ts'] = null;
+        saveAccs();
+        
+        if (el) {
+          const td = el.parentElement;
+          // 局部更新文字
+          const displayDiv = td.querySelector('.time-display');
+          if (displayDiv) displayDiv.innerText = v || '--:--';
+          
+          // 🌟 清除冗余：动态显示/隐藏“全透明隐形层” (彻底抛弃旧版小叉号)
+          let layer = td.querySelector('.invisible-clear-layer');
+          if (v && !layer) {
+            td.insertAdjacentHTML('beforeend', `<div class="invisible-clear-layer" onclick="updateAccField(${i}, '${f}', ''); event.stopPropagation();"></div>`);
+          } else if (!v && layer) {
+            layer.remove();
+          }
+        } else {
+          // 如果是清空操作，重绘表格
+          renderAccountManager();
+        }
+        return;
+      }
 
       saveAccs();
-      if (f === 'blessing') renderAccountManager();
+      
+      // 其他字段局部更新...
+      const row = document.getElementById('accountListBody').children[i];
+      if (!row) return;
+
+      if (f === 'name') updateSyncDropdowns();
+
+      if (f === 'blessing') {
+        const isDone = window.accounts[i].taskDone && (parseInt(window.accounts[i].blessing) === 0);
+        if (isDone) row.classList.add('name-completed');
+        else row.classList.remove('name-completed');
+      }
+
+      if (f === 'fruit') {
+        const fruitTd = row.querySelector('.fruit-td');
+        if (v.trim() !== '') fruitTd.classList.add('has-fruit');
+        else fruitTd.classList.remove('has-fruit');
+      }
     }
+
+
+
     function toggleAccTask(i) { window.accounts[i].taskDone = !window.accounts[i].taskDone; saveAccs(); renderAccountManager(); }
     function resetDailyAll() { window.accounts.forEach(a => { a.blessing = 10; a.taskDone = false }); saveAccs(); renderAccountManager(); }
     function resetAccRow(i) { window.accounts[i].water1 = ''; window.accounts[i].water2 = ''; window.accounts[i].harvest = ''; saveAccs(); renderAccountManager(); }
@@ -2381,7 +2312,9 @@
     // 别忘了在底部的 Object.assign 中暴露这些新函数给 HTML 调用
     Object.assign(window, {
       addNewAccount, deleteAcc, updateAccField, toggleAccTask,
-      resetDailyAll, resetAccRow, moveAcc, syncTimelineToAccount, syncCalcToAccount
+      resetDailyAll, resetAccRow, moveAcc, syncTimelineToAccount, syncCalcToAccount,
+      // 🌟 清理更新了正确的触摸事件函数名
+      startTouch, cancelTouch, preventClickIfLongPress
     });
 
 
