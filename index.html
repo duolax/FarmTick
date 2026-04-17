@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>FarmTick | 智能务农系统</title>
+  
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+  <div class="container">
+    <h1>🌾 FarmTick 智能务农系统</h1>
+
+    <div class="card" id="card_calc">
+      <div class="card-header-flex" onclick="toggleCard('card_calc')">
+        <h2 class="card-title">⏱️ 极限收割计算器</h2>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="card-content">
+        <div id="content_calc">
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <label style="margin: 0;">1. 植物总时间</label>
+              <button onclick="openPlantModal()" style="background: var(--primary-light); color: var(--primary); border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">?</button>
+            </div>
+            <div class="btn-group" id="calcBtnGroup" style="margin-bottom: 10px;">
+              <button type="button" class="time-btn" onclick="setCalcDurationWeb(1, this)">1 小时</button>
+              <button type="button" class="time-btn" onclick="setCalcDurationWeb(8, this)">8 小时</button>
+              <button type="button" class="time-btn active" onclick="setCalcDurationWeb(16, this)">16 小时</button>
+              <button type="button" class="time-btn" onclick="setCalcDurationWeb(32, this)">32 小时</button>
+            </div>
+            <div class="input-row">
+              <input type="number" id="t_h" placeholder="时" value="0" min="0" oninput="clearCalcActiveBtn(); calculate()" />
+              <span class="input-addon">时</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>2. 当前剩余种植时间</label>
+            <div class="input-row">
+              <input type="number" id="r_h" placeholder="时" value="0" min="0" oninput="calculate()" />
+              <span class="input-addon">时</span>
+              <input type="number" id="r_m" placeholder="分" value="0" min="0" max="59" oninput="calculate()" />
+              <span class="input-addon">分</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>3. 当前剩余水量</label>
+            <div class="input-row">
+              <input type="number" id="w_h" placeholder="时" value="0" min="0" oninput="calculate()" />
+              <span class="input-addon">时</span>
+              <input type="number" id="w_m" placeholder="分" value="0" min="0" max="59" oninput="calculate()" />
+              <span class="input-addon">分</span>
+            </div>
+          </div>
+
+          <div id="resultPanel"></div>
+
+          <div id="saveHarvestContainer" style="display: none; margin-top: 15px;">
+            <div style="display: flex; gap: 8px; margin-bottom: 10px; align-items: center;">
+              <input type="text" id="harvestRecordName" placeholder="给记录取个名字（如XXX-菠萝）" style="flex: 1; padding: 0 10px; height: 40px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; box-sizing: border-box;" />
+              <button class="sync-btn" onclick="saveHarvestRecord()">保存</button>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <select class="acc-sync-select" id="calcSyncSelect" style="flex: 1; padding: 0 10px; height: 40px; border-radius: 8px; font-size: 14px; box-sizing: border-box; border: 1px solid var(--border);">
+                <option value="">同步计算结果到账号...</option>
+              </select>
+              <button class="sync-btn" onclick="syncCalcToAccount()">同步</button>
+            </div>
+          </div>
+
+          <div id="historyPanel" class="card" style="display: none; padding: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); margin-bottom: 10px; padding-bottom: 8px;">
+              <h2 class="card-title" id="historyTitle" style="border:none; margin: 0; font-size: 16px;">🕒 最近 10 次收割记录</h2>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 12px; color: var(--text-muted);">显示条数:</span>
+                <input type="number" id="maxHistoryCount" value="5" min="1" max="50" onchange="updateMaxHistoryCount()" style="width: 45px; padding: 4px; font-size: 13px; border: 1px solid var(--border); border-radius: 4px; text-align: center;">
+              </div>
+            </div>
+            <div id="historyList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="card_timeline">
+      <div class="card-header-flex" onclick="toggleCard('card_timeline')">
+        <h2 class="card-title">📅 智能护肝排期器</h2>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="card-content">
+        <p style="font-size: 14px; color: var(--text-muted)">
+          种下瞬间一键排期，智能穿插睡前补水与憋气防偷菜策略。
+        </p>
+
+        <div class="form-group">
+          <label>1. 农作物总时长</label>
+          <div class="btn-group">
+            <button type="button" class="time-btn" onclick="setDuration(60, this)">1 小时</button>
+            <button type="button" class="time-btn" onclick="setDuration(480, this)">8 小时</button>
+            <button type="button" class="time-btn active" onclick="setDuration(960, this)">16 小时</button>
+            <button type="button" class="time-btn" onclick="setDuration(1920, this)">32 小时</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>2. 实际种下时间</label>
+          <div class="input-row">
+            <input type="datetime-local" id="plantTime" onchange="generateTimeline()" />
+            <button class="sync-btn" onclick="setCurrentPlantTime()">刷新当前时间</button>
+          </div>
+        </div>
+
+        <div class="form-group" style="background:#fffaf0; padding:15px; border-radius:10px; border:1px dashed #ed6c02;">
+          <label style="display:flex; justify-content:space-between; align-items: center; margin-bottom: 0;">
+            <span style="font-weight: bold; color: var(--warning);">🌙 智能护肝模式 (自动穿插防偷菜)</span>
+            <input type="checkbox" id="useSleepMode" checked onchange="generateTimeline()" style="width:20px; height: 20px; margin: 0;">
+          </label>
+          <div class="input-row" style="margin-top:10px;">
+            <span style="font-size: 13px;">入睡:</span>
+            <input type="time" id="sleepStart" value="23:30" onchange="generateTimeline()" style="flex: 1;">
+            <span style="font-size: 13px; margin-left: 10px;">醒来:</span>
+            <input type="time" id="sleepEnd" value="07:30" onchange="generateTimeline()" style="flex: 1;">
+          </div>
+        </div>
+
+        <div id="timelinePanel" style="display:none; margin-top:20px;">
+          <div id="timelineWarning" style="display:none; margin-bottom:15px;"></div>
+          <div class="timeline-container" id="timelineList"></div>
+        </div>
+
+        <div style="margin-top: 15px; display: flex; gap: 8px;">
+          <select class="acc-sync-select" id="timelineSyncSelect" style="flex: 1; padding: 8px; font-size: 13px; border-radius: 8px; border: 1px solid var(--border);">
+            <option value="">同步排期到账号...</option>
+          </select>
+          <button class="sync-btn" onclick="syncTimelineToAccount()">同步</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card account-manager-card" id="card_account">
+      <div class="card-header-flex" onclick="toggleCard('card_account')">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <h2 class="card-title">📋 农场账号管家</h2>
+          <span id="accountCount" style="font-size: 12px; color: var(--text-muted); background: #f0f0f0; padding: 2px 8px; border-radius: 10px;">0</span>
+        </div>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="card-content">
+       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <div style="display: flex; gap: 8px;">
+            <button class="ios-btn" style="background:#f4f5f9; color:#666;" onclick="exportToCSV()">📤 导出Excel</button>
+            <button class="ios-btn" style="background:#f4f5f9; color:#666;" onclick="document.getElementById('importFile').click()">📥 导入备份</button>
+            <input type="file" id="importFile" accept=".csv" style="display:none" onchange="importFromCSV(event)">
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="ios-btn btn-reset" onclick="resetDailyAll()">每日重置</button>
+            <button class="ios-btn btn-add" onclick="addNewAccount()">+</button>
+          </div>
+        </div>
+
+        <div class="table-scroll" style="overflow-x: auto; background: #fff; border-radius: 8px; border: 1px solid var(--border);">
+          <div class="account-table" style="min-width: 860px;">
+            <div class="acc-tr acc-th-row" style="display: grid; grid-template-columns: 60px 130px 70px 60px 90px 85px 85px 85px 60px 50px 70px; background: #f8f8f8; font-weight: bold; font-size: 12px; text-align: center; border-bottom: 1px solid var(--border);">
+              <div class="acc-td">大区</div>
+              <div class="acc-td">名字</div>
+              <div class="acc-td">祝福</div>
+              <div class="acc-td">任务</div>
+              <div class="acc-td">作物</div>
+              <div class="acc-td">水1</div>
+              <div class="acc-td">水2</div>
+              <div class="acc-td">收获</div>
+              <div class="acc-td">重</div>
+              <div class="acc-td">排</div>
+              <div class="acc-td">删</div>
+            </div>
+            <div id="accountListBody"></div>
+          </div>
+        </div>
+        <p style="text-align: center; font-size: 11px; color: #bbb; margin-top: 10px;">左右滑动查看完整表格 | 点击时间修改 | 长按/右键清空</p>
+      </div>
+    </div>
+
+    <div class="card" id="card_data">
+      <div class="card-header-flex" onclick="toggleCard('card_data')">
+        <h2 class="card-title">📊 农场数据中心</h2>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="card-content">
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab('crops')">🌾 作物信息</button>
+          <button class="tab-btn" onclick="switchTab('farm')">🏡 农场等级</button>
+          <button class="tab-btn" onclick="switchTab('upgrade')">⬆️ 作物升级</button>
+          <button class="tab-btn" onclick="switchTab('stall')">🛒 小摊等级</button>
+          <button class="tab-btn" onclick="switchTab('field')">🚜 农田开垦</button>
+        </div>
+
+        <div id="tab-crops" class="tab-content active">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th onclick="sortTable('level')">解锁等级</th>
+                  <th onclick="sortTable('name')">农作物</th>
+                  <th onclick="sortTable('buy')">购买价</th>
+                  <th onclick="sortTable('sell')">出售总价↕</th>
+                  <th onclick="sortTable('time')">总时长</th>
+                  <th onclick="sortTable('expH')">经验/h</th>
+                  <th onclick="sortTable('coinH')">金币/h</th>
+                  <th onclick="sortTable('advice')">种植建议</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="tab-farm" class="tab-content">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>等级</th>
+                  <th>费用</th>
+                  <th>需求经验</th>
+                  <th>作物</th>
+                  <th>变异</th>
+                  <th>小摊</th>
+                  <th>开垦农田</th>
+                  <th>功能</th>
+                  <th>家具</th>
+                </tr>
+              </thead>
+              <tbody id="farmTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="tab-upgrade" class="tab-content">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th style="position: sticky; left: 0; z-index: 2; background: var(--primary-light);">作物</th>
+                  <th>满级数量</th>
+                  <th>2级</th>
+                  <th>3级</th>
+                  <th>4级</th>
+                  <th>5级</th>
+                  <th>6级</th>
+                  <th>7级</th>
+                  <th>8级</th>
+                  <th>9级</th>
+                  <th>10级</th>
+                </tr>
+              </thead>
+              <tbody id="upgradeTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="tab-stall" class="tab-content">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>等级</th>
+                  <th>升级费用</th>
+                  <th>奖励经验</th>
+                  <th>提升售价</th>
+                </tr>
+              </thead>
+              <tbody id="stallTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="tab-field" class="tab-content">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>农田</th>
+                  <th>开垦费用</th>
+                  <th>获得农场经验</th>
+                </tr>
+              </thead>
+              <tbody id="fieldTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer-acknowledgement">
+      <p style="margin: 5px 0;">✨ 本工具基于开源项目开发优化，感谢原作者 <strong>gzchenjin2</strong> 的无私分享与贡献！</p>
+      <p style="margin: 5px 0;">🍠 原作者小红书 ID：<strong>1483848881 (CJ凑字数)</strong></p>
+      <p style="margin: 5px 0;">
+          <a href="https://github.com/gzchenjin2/hokfarming" target="_blank">🔗 访问原始开源仓库 (GitHub)</a>
+      </p>
+    </div>
+  </div>
+
+  <div id="busuanzi_footer" style="text-align: center; margin-top: 10px; margin-bottom: 20px; color: var(--text-muted); font-size: 14px; display: none;">
+    <span id="busuanzi_container_site_pv">👀 务农系统总运转 <span id="busuanzi_value_site_pv" style="font-weight: bold; color: var(--primary)"></span> 次</span>
+    <span style="margin: 0 10px">|</span>
+    <span id="busuanzi_container_site_uv">👤 累计服务农场主 <span id="busuanzi_value_site_uv" style="font-weight: bold; color: var(--primary)"></span> 人</span>
+  </div>
+
+  <div id="plantListModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(2px);">
+    <div style="background: #fff; width: 90%; max-width: 400px; border-radius: 12px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-height: 80vh; overflow-y: auto; position: relative;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-bottom: 15px;">
+        <h3 style="margin: 0; color: var(--primary); font-size: 18px;">📖 各时间植物清单</h3>
+        <button onclick="closePlantModal()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #999;">✖</button>
+      </div>
+      <div style="margin-bottom: 12px;">
+        <div style="font-weight: bold; color: var(--secondary); margin-bottom: 4px;">⏱️ 1 小时作物</div>
+        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">土豆、向日葵、黄瓜、白萝卜、洋葱、莴笋、四季豆、甘蔗、桑葚、树莓、咖啡豆</div>
+      </div>
+      <div style="margin-bottom: 12px;">
+        <div style="font-weight: bold; color: var(--secondary); margin-bottom: 4px;">⏱️ 8 小时作物</div>
+        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">玉米、青椒、茄子、葡萄、花菜、红枣、冬瓜、葫芦、杏子、芒果、火龙果</div>
+      </div>
+      <div style="margin-bottom: 12px;">
+        <div style="font-weight: bold; color: var(--secondary); margin-bottom: 4px;">⏱️ 16 小时作物</div>
+        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">草莓、大蒜、香蕉、南瓜、生菜、西瓜、花生、棉花、李子、桃子、哈密瓜、山竹、石榴、木瓜、橘子、柚子、杨桃、柠檬、枇杷、山楂、牛油果</div>
+      </div>
+      <div style="margin-bottom: 12px;">
+        <div style="font-weight: bold; color: var(--secondary); margin-bottom: 4px;">⏱️ 32 小时作物</div>
+        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">蓝莓、卷心菜、辣椒、荞麦、菠萝、梨子、樱桃、灯笼果、猕猴桃、莲花</div>
+      </div>
+      <button onclick="closePlantModal()" style="width: 100%; margin-top: 10px; padding: 10px; background: var(--primary-light); color: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">我知道了</button>
+    </div>
+  </div>
+
+  <div id="app_download_card" class="card" style="display: none; margin-top: 10px; padding: 20px; background: linear-gradient(135deg, #e8f5e9 0%, #f4f7f6 100%); text-align: center; border: 1px solid #c8e6c9;">
+    <h3 style="margin: 0 0 10px 0; color: var(--primary); font-size: 18px">🤖 安卓可通过app，离线使用获取最佳体验</h3>
+    <a href="https://github.com/duolax/FarmTick/releases/latest/download/FarmTick.apk" target="_blank" style="display: inline-block; background: var(--primary); color: white; text-decoration: none; padding: 10px 28px; border-radius: 25px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 12px rgba(46, 125, 50, 0.2);">⬇️ 下载 Android 版 (APK)</a>
+  </div>
+
+  <script src="./js/config/data.js"></script>
+  <script src="./js/core/utils.js"></script>
+  <script src="./js/core/alarm.js"></script>
+  <script src="./js/modules/ui.js"></script>
+  <script src="./js/modules/calculator.js"></script>
+  <script src="./js/modules/timeline.js"></script>
+  <script src="./js/modules/account.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>
