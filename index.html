@@ -1672,9 +1672,17 @@
 
   </script>
 
-  <script type="module">
-    import { LocalNotifications } from '@capacitor/local-notifications';
-    window.NativeAlarm = LocalNotifications;
+<script>
+    // 远程加载模式下，直接从注入的全局变量中获取闹钟插件
+    document.addEventListener('DOMContentLoaded', () => {
+      // 延迟一小会儿，确保 Capacitor 桥接文件注入完毕
+      setTimeout(() => {
+        if (window.Capacitor && window.Capacitor.Plugins) {
+          window.NativeAlarm = window.Capacitor.Plugins.LocalNotifications;
+          console.log("原生闹钟插件挂载成功！");
+        }
+      }, 500);
+    });
   </script>
 
 </body>
